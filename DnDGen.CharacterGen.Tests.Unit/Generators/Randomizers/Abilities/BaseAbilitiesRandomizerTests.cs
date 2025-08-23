@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Abilities;
-using DnDGen.CharacterGen.Generators.Randomizers.Abilities;
+using DnDGen.CharacterGen.Randomizers.Abilities;
 using NUnit.Framework;
 
 namespace DnDGen.CharacterGen.Tests.Unit.Generators.Randomizers.Abilities

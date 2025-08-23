@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Generators.Randomizers.CharacterClasses.Levels;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.RollGen;
 using Moq;
 using NUnit.Framework;

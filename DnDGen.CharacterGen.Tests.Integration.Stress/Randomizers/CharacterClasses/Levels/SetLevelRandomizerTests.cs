@@ -1,4 +1,4 @@
-﻿using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+﻿using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using NUnit.Framework;
 using System;
 

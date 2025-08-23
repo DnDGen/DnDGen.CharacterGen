@@ -1,4 +1,5 @@
 ﻿using DnDGen.CharacterGen.Abilities;
+using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Generators.Feats;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Selectors.Collections;

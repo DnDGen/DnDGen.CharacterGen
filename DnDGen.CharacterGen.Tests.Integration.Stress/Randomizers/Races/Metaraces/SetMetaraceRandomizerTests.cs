@@ -1,4 +1,5 @@
 ﻿using DnDGen.CharacterGen.Randomizers.Races;
+using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
 using NUnit.Framework;
 
 namespace DnDGen.CharacterGen.Tests.Integration.Stress.Randomizers.Races.Metaraces

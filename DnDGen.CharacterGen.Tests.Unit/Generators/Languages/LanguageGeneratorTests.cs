@@ -9,6 +9,7 @@ using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using DnDGen.CharacterGen.Languages;
 
 namespace DnDGen.CharacterGen.Tests.Unit.Generators.Languages
 {

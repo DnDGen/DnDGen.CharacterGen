@@ -1,4 +1,4 @@
-﻿using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+﻿using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
 using NUnit.Framework;
 
 namespace DnDGen.CharacterGen.Tests.Integration.Stress.Randomizers.CharacterClasses.ClassNames

@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Alignments;
-using DnDGen.CharacterGen.Generators.Randomizers.Alignments;
+using DnDGen.CharacterGen.Randomizers.Alignments;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.CharacterGen.Verifiers.Exceptions;
 using DnDGen.Infrastructure.Selectors.Collections;

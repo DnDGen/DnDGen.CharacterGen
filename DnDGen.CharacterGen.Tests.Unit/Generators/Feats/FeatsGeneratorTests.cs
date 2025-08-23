@@ -1,7 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Combats;
-using DnDGen.CharacterGen.Generators.Feats;
 using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Skills;

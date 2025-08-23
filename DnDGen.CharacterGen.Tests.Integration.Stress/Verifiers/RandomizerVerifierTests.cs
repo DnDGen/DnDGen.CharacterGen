@@ -2,8 +2,11 @@
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Randomizers.Races;
+using DnDGen.CharacterGen.Randomizers.Races.BaseRaces;
+using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
 using DnDGen.Infrastructure.Selectors.Collections;
 using NUnit.Framework;
 using System;
