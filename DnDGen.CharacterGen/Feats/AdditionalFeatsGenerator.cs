@@ -1,7 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Combats;
-using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Selectors.Collections;
 using DnDGen.CharacterGen.Selectors.Selections;
@@ -11,7 +10,7 @@ using DnDGen.Infrastructure.Selectors.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Feats
+namespace DnDGen.CharacterGen.Feats
 {
     internal class AdditionalFeatsGenerator : IAdditionalFeatsGenerator
     {

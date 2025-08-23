@@ -1,5 +1,4 @@
-﻿using DnDGen.CharacterGen.Combats;
-using DnDGen.CharacterGen.Feats;
+﻿using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Items;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Selectors.Collections;
@@ -10,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Combats
+namespace DnDGen.CharacterGen.Combats
 {
     internal class ArmorClassGenerator : IArmorClassGenerator
     {

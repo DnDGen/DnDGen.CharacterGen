@@ -1,8 +1,8 @@
 ﻿using DnDGen.CharacterGen.Characters;
-using DnDGen.CharacterGen.Generators.Characters;
 using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Randomizers.Races;
 using DnDGen.CharacterGen.Verifiers;
 using DnDGen.Stress;

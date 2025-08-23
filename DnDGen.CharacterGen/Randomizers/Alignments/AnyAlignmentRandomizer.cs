@@ -2,7 +2,7 @@
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.Infrastructure.Selectors.Percentiles;
 
-namespace DnDGen.CharacterGen.Generators.Randomizers.Alignments
+namespace DnDGen.CharacterGen.Randomizers.Alignments
 {
     internal class AnyAlignmentRandomizer : BaseAlignmentRandomizer
     {

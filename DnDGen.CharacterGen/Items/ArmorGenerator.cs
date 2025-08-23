@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Items
+namespace DnDGen.CharacterGen.Items
 {
     internal class ArmorGenerator : IArmorGenerator
     {

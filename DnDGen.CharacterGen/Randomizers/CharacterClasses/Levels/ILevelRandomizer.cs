@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DnDGen.CharacterGen.Randomizers.CharacterClasses
+namespace DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels
 {
     public interface ILevelRandomizer
     {

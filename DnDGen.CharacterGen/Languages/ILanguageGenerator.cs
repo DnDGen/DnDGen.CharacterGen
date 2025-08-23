@@ -4,7 +4,7 @@ using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Skills;
 using System.Collections.Generic;
 
-namespace DnDGen.CharacterGen.Generators.Languages
+namespace DnDGen.CharacterGen.Languages
 {
     internal interface ILanguageGenerator
     {

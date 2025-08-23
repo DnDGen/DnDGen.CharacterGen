@@ -1,8 +1,7 @@
-﻿using DnDGen.CharacterGen.Alignments;
-using DnDGen.CharacterGen.Randomizers.Alignments;
+﻿using DnDGen.CharacterGen.Randomizers.Alignments;
 using System.Collections.Generic;
 
-namespace DnDGen.CharacterGen.Generators.Alignments
+namespace DnDGen.CharacterGen.Alignments
 {
     internal class AlignmentGenerator : IAlignmentGenerator
     {

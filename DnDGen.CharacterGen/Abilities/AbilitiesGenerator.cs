@@ -1,5 +1,4 @@
-﻿using DnDGen.CharacterGen.Abilities;
-using DnDGen.CharacterGen.CharacterClasses;
+﻿using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Selectors.Collections;
@@ -10,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Abilities
+namespace DnDGen.CharacterGen.Abilities
 {
     internal class AbilitiesGenerator : IAbilitiesGenerator
     {

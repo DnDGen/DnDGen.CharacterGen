@@ -1,10 +1,9 @@
 ﻿using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Randomizers.Races;
 using System.Collections.Generic;
 
-namespace DnDGen.CharacterGen.Generators.Races
+namespace DnDGen.CharacterGen.Races
 {
     internal interface IRaceGenerator
     {

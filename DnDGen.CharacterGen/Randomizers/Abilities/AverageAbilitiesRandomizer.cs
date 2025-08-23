@@ -1,6 +1,6 @@
 ﻿using DnDGen.RollGen;
 
-namespace DnDGen.CharacterGen.Generators.Randomizers.Abilities
+namespace DnDGen.CharacterGen.Randomizers.Abilities
 {
     internal class AverageAbilitiesRandomizer : BaseAbilitiesRandomizer
     {

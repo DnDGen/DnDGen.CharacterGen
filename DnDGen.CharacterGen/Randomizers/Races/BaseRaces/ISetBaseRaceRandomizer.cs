@@ -1,4 +1,4 @@
-﻿namespace DnDGen.CharacterGen.Randomizers.Races
+﻿namespace DnDGen.CharacterGen.Randomizers.Races.BaseRaces
 {
     public interface ISetBaseRaceRandomizer : RaceRandomizer
     {

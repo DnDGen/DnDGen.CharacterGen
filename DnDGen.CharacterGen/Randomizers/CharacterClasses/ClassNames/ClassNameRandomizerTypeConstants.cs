@@ -1,4 +1,4 @@
-﻿namespace DnDGen.CharacterGen.Randomizers.CharacterClasses
+﻿namespace DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames
 {
     public static class ClassNameRandomizerTypeConstants
     {

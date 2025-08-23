@@ -1,7 +1,6 @@
 ﻿using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Magics;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Selectors.Collections;
 using DnDGen.CharacterGen.Tables;
@@ -10,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Magics
+namespace DnDGen.CharacterGen.Magics
 {
     internal class AnimalGenerator : IAnimalGenerator
     {

@@ -1,10 +1,9 @@
 ﻿using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.Characters;
-using DnDGen.CharacterGen.Generators.Characters;
-using DnDGen.CharacterGen.Leaders;
 using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Randomizers.Races;
 using DnDGen.CharacterGen.Selectors.Collections;
 using DnDGen.CharacterGen.Tables;
@@ -15,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Leaders
+namespace DnDGen.CharacterGen.Leaders
 {
     internal class LeadershipGenerator(
         ICharacterGenerator characterGenerator,

@@ -1,7 +1,7 @@
 ﻿using DnDGen.CharacterGen.Alignments;
-using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
+using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Selectors.Collections;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
@@ -9,7 +9,7 @@ using DnDGen.Infrastructure.Selectors.Percentiles;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DnDGen.CharacterGen.Generators.Classes
+namespace DnDGen.CharacterGen.CharacterClasses
 {
     internal class CharacterClassGenerator : ICharacterClassGenerator
     {
