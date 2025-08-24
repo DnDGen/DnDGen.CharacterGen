@@ -1,6 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities;
+using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Leaders;
-using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Tests.Integration.Generators.Characters;

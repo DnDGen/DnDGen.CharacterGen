@@ -1,6 +1,6 @@
-﻿using DnDGen.CharacterGen.CharacterClasses;
+﻿using DnDGen.CharacterGen.Abilities.Randomizers;
+using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Abilities;
 using System.Collections.Generic;
 
 namespace DnDGen.CharacterGen.Abilities

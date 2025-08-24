@@ -1,22 +1,22 @@
 ﻿using DnDGen.CharacterGen.Abilities;
+using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Combats;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Generators.Skills;
 using DnDGen.CharacterGen.Items;
 using DnDGen.CharacterGen.Languages;
 using DnDGen.CharacterGen.Leaders;
 using DnDGen.CharacterGen.Magics;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Randomizers.Alignments;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using DnDGen.CharacterGen.Randomizers.Races;
 using DnDGen.CharacterGen.Randomizers.Races.BaseRaces;
 using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
+using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Verifiers;
 using DnDGen.RollGen;
 using DnDGen.TreasureGen.Generators;
@@ -425,12 +425,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         }
 
         [Test]
-        public void AbilitiesRandomizerNamedRawIsRawAbilitiesRandomizer()
-        {
-            AssertNamedIsInstanceOf<IAbilitiesRandomizer, RawAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
-        }
-
-        [Test]
         public void AbilitiesRandomizerNamedTwoTenSidedDiceIsTwoTenSidedDiceAbilitiesRandomizer()
         {
             AssertNamedIsInstanceOf<IAbilitiesRandomizer, TwoTenSidedDiceAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.TwoTenSidedDice);
@@ -442,11 +436,16 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         [TestCase(AbilitiesRandomizerTypeConstants.Heroic)]
         [TestCase(AbilitiesRandomizerTypeConstants.OnesAsSixes)]
         [TestCase(AbilitiesRandomizerTypeConstants.Poor)]
-        [TestCase(AbilitiesRandomizerTypeConstants.Raw)]
         [TestCase(AbilitiesRandomizerTypeConstants.TwoTenSidedDice)]
-        public void StatRandomizerIsNotBuiltAsSingleton(string name)
+        public void AbilitiesRandomizerIsNotBuiltAsSingleton(string name)
         {
             AssertNotSingleton<IAbilitiesRandomizer>(name);
+        }
+
+        [Test]
+        public void DefaultAbilitiesRandomizerIsBestOfFour()
+        {
+            AssertIsInstanceOf<IAbilitiesRandomizer, BestOfFourAbilitiesRandomizer>();
         }
 
         [Test]

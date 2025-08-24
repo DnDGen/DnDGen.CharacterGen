@@ -28,5 +28,14 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC
             var instance = GetNewInstanceOf<I>(name);
             Assert.That(instance, Is.InstanceOf<T>());
         }
+
+        protected void AssertIsInstanceOf<I, T>()
+            where T : I
+        {
+            AssertNotSingleton<I>();
+
+            var instance = GetNewInstanceOf<I>();
+            Assert.That(instance, Is.InstanceOf<T>());
+        }
     }
 }

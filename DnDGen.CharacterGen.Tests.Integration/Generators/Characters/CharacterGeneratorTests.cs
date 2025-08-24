@@ -1,11 +1,11 @@
 ﻿using DnDGen.CharacterGen.Abilities;
+using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Languages;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.CharacterGen.Randomizers.Alignments;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;

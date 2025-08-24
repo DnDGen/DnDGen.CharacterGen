@@ -1,5 +1,5 @@
-﻿using DnDGen.CharacterGen.Characters;
-using DnDGen.CharacterGen.Randomizers.Abilities;
+﻿using DnDGen.CharacterGen.Abilities.Randomizers;
+using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Randomizers.Alignments;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
 using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
