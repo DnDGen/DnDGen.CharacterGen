@@ -347,7 +347,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         [Test]
         public void DefaultBaseRaceRandomizerIsAny()
         {
-            AssertNamedIsInstanceOf<IAlignmentRandomizer, AnyAlignmentRandomizer>(RaceRandomizerTypeConstants.BaseRace.Default);
+            AssertNamedIsInstanceOf<RaceRandomizer, AnyBaseRaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.Default);
         }
 
         [Test]
@@ -403,7 +403,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         [Test]
         public void DefaultMetaraceRandomizerIsAnyMeta()
         {
-            AssertNamedIsInstanceOf<IAlignmentRandomizer, AnyAlignmentRandomizer>(RaceRandomizerTypeConstants.Metarace.Default);
+            AssertNamedIsInstanceOf<RaceRandomizer, AnyMetaraceRandomizer>(RaceRandomizerTypeConstants.Metarace.Default);
         }
 
         [Test]
