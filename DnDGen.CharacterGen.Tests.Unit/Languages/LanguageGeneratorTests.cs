@@ -1,7 +1,7 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Generators.Languages;
-using DnDGen.CharacterGen.Selectors.Collections;
+using DnDGen.CharacterGen.Languages;
+using DnDGen.CharacterGen.Languages.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.Infrastructure.Selectors.Collections;
@@ -9,7 +9,6 @@ using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using DnDGen.CharacterGen.Languages;
 
 namespace DnDGen.CharacterGen.Tests.Unit.Languages
 {

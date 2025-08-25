@@ -1,4 +1,4 @@
-﻿using DnDGen.CharacterGen.Selectors.Collections;
+﻿using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
 using NUnit.Framework;

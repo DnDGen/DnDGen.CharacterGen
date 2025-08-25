@@ -1,9 +1,8 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Generators.Feats;
+using DnDGen.CharacterGen.Feats.Selectors;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Selectors.Collections;
-using DnDGen.CharacterGen.Selectors.Selections;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
@@ -42,11 +41,11 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             racialFeatsGenerator = new RacialFeatsGenerator(mockCollectionsSelector.Object, mockAdjustmentsSelector.Object, mockFeatsSelector.Object, mockFeatFocusGenerator.Object, mockDice.Object);
 
             race = new Race();
-            baseRaceFeats = new List<RacialFeatSelection>();
-            metaraceFeats = new List<RacialFeatSelection>();
-            speciesFeats = new List<RacialFeatSelection>();
-            skills = new List<Skill>();
-            stats = new Dictionary<string, Ability>();
+            baseRaceFeats = [];
+            metaraceFeats = [];
+            speciesFeats = [];
+            skills = [];
+            stats = [];
 
             race.BaseRace = "base race";
             race.Metarace = "metarace";

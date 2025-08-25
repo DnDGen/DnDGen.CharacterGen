@@ -1,7 +1,5 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Selectors.Collections;
-using DnDGen.CharacterGen.Selectors.Selections;
 using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Skills;
@@ -10,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using DnDGen.CharacterGen.Feats.Selectors;
 
 namespace DnDGen.CharacterGen.Tests.Unit.Feats
 {

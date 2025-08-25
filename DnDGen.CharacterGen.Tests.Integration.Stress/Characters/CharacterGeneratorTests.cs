@@ -1,7 +1,7 @@
 ﻿using DnDGen.CharacterGen.Abilities.Randomizers;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
-using DnDGen.CharacterGen.Randomizers.Races;
+using DnDGen.CharacterGen.Races.Randomizers;
 using DnDGen.CharacterGen.Tests.Integration.Generators.Characters;
 using NUnit.Framework;
 

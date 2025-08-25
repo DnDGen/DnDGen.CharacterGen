@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Alignments;
-using DnDGen.CharacterGen.Randomizers.Alignments;
+using DnDGen.CharacterGen.Alignments.Randomizers;
 using Moq;
 using NUnit.Framework;
 

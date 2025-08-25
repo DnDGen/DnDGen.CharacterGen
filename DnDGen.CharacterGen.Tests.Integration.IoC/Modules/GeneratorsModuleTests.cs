@@ -1,7 +1,10 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Alignments;
+using DnDGen.CharacterGen.Alignments.Randomizers;
 using DnDGen.CharacterGen.CharacterClasses;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
 using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Combats;
 using DnDGen.CharacterGen.Feats;
@@ -10,12 +13,9 @@ using DnDGen.CharacterGen.Languages;
 using DnDGen.CharacterGen.Leaders;
 using DnDGen.CharacterGen.Magics;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
-using DnDGen.CharacterGen.Randomizers.Races;
-using DnDGen.CharacterGen.Randomizers.Races.BaseRaces;
-using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
+using DnDGen.CharacterGen.Races.Randomizers;
+using DnDGen.CharacterGen.Races.Randomizers.BaseRaces;
+using DnDGen.CharacterGen.Races.Randomizers.Metaraces;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Verifiers;
 using DnDGen.RollGen;
@@ -161,6 +161,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         }
 
         [Test]
+        public void DefaultAlignmentRandomizerIsAny()
+        {
+            AssertNamedIsInstanceOf<IAlignmentRandomizer, AnyAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Default);
+        }
+
+        [Test]
         public void SetAlignmentRandomizerIsNotBuiltAsSingleton()
         {
             AssertNotSingleton<ISetAlignmentRandomizer>();
@@ -228,6 +234,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         }
 
         [Test]
+        public void DefaultClassNameRandomizerIsAnyPlayer()
+        {
+            AssertNamedIsInstanceOf<IClassNameRandomizer, AnyPlayerClassNameRandomizer>(ClassNameRandomizerTypeConstants.Default);
+        }
+
+        [Test]
         public void SetClassNameRandomizerIsNotBuiltAsSingleton()
         {
             AssertNotSingleton<ISetClassNameRandomizer>();
@@ -271,6 +283,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         public void LevelRandomizerIsNotBuiltAsSingleton(string name)
         {
             AssertNotSingleton<ILevelRandomizer>(name);
+        }
+
+        [Test]
+        public void DefaultLevelRandomizerIsAny()
+        {
+            AssertNamedIsInstanceOf<ILevelRandomizer, AnyLevelRandomizer>(LevelRandomizerTypeConstants.Default);
         }
 
         [Test]
@@ -327,6 +345,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         }
 
         [Test]
+        public void DefaultBaseRaceRandomizerIsAny()
+        {
+            AssertNamedIsInstanceOf<IAlignmentRandomizer, AnyAlignmentRandomizer>(RaceRandomizerTypeConstants.BaseRace.Default);
+        }
+
+        [Test]
         public void SetBaseRaceRandomizerIsNotBuiltAsSingleton()
         {
             AssertNotSingleton<ISetBaseRaceRandomizer>();
@@ -374,6 +398,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         {
             AssertNotSingleton<IForcableMetaraceRandomizer>(name);
             AssertNotSingleton<RaceRandomizer>(name);
+        }
+
+        [Test]
+        public void DefaultMetaraceRandomizerIsAnyMeta()
+        {
+            AssertNamedIsInstanceOf<IAlignmentRandomizer, AnyAlignmentRandomizer>(RaceRandomizerTypeConstants.Metarace.Default);
         }
 
         [Test]
@@ -445,7 +475,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         [Test]
         public void DefaultAbilitiesRandomizerIsBestOfFour()
         {
-            AssertIsInstanceOf<IAbilitiesRandomizer, BestOfFourAbilitiesRandomizer>();
+            AssertNamedIsInstanceOf<IAbilitiesRandomizer, BestOfFourAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Default);
         }
 
         [Test]

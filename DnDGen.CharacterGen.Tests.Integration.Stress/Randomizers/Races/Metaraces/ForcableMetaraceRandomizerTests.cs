@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
+using DnDGen.CharacterGen.Races.Randomizers.Metaraces;
 using NUnit.Framework;
 using System.Collections.Generic;
 

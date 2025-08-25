@@ -1,7 +1,10 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Alignments;
+using DnDGen.CharacterGen.Alignments.Randomizers;
 using DnDGen.CharacterGen.CharacterClasses;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
 using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Combats;
 using DnDGen.CharacterGen.Feats;
@@ -10,12 +13,9 @@ using DnDGen.CharacterGen.Languages;
 using DnDGen.CharacterGen.Leaders;
 using DnDGen.CharacterGen.Magics;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
-using DnDGen.CharacterGen.Randomizers.Races;
-using DnDGen.CharacterGen.Randomizers.Races.BaseRaces;
-using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
+using DnDGen.CharacterGen.Races.Randomizers;
+using DnDGen.CharacterGen.Races.Randomizers.BaseRaces;
+using DnDGen.CharacterGen.Races.Randomizers.Metaraces;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Verifiers;
 using Ninject;
@@ -117,7 +117,6 @@ namespace DnDGen.CharacterGen.IoC.Modules
             Bind<IAbilitiesRandomizer>().To<HeroicAbilitiesRandomizer>().Named(AbilitiesRandomizerTypeConstants.Heroic);
             Bind<IAbilitiesRandomizer>().To<OnesAsSixesAbilitiesRandomizer>().Named(AbilitiesRandomizerTypeConstants.OnesAsSixes);
             Bind<IAbilitiesRandomizer>().To<PoorAbilitiesRandomizer>().Named(AbilitiesRandomizerTypeConstants.Poor);
-            Bind<IAbilitiesRandomizer>().To<RawAbilitiesRandomizer>().Named(AbilitiesRandomizerTypeConstants.Raw);
             Bind<IAbilitiesRandomizer>().To<TwoTenSidedDiceAbilitiesRandomizer>().Named(AbilitiesRandomizerTypeConstants.TwoTenSidedDice);
 
             Bind<ISetAlignmentRandomizer>().To<SetAlignmentRandomizer>();

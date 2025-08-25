@@ -1,12 +1,11 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Generators.Skills;
 using DnDGen.CharacterGen.Items;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Selectors.Collections;
-using DnDGen.CharacterGen.Selectors.Selections;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Skills;
+using DnDGen.CharacterGen.Skills.Selectors;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.Infrastructure.Selectors.Percentiles;

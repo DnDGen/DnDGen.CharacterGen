@@ -1,4 +1,4 @@
-﻿using DnDGen.CharacterGen.Randomizers.Alignments;
+﻿using DnDGen.CharacterGen.Alignments.Randomizers;
 using NUnit.Framework;
 using System;
 

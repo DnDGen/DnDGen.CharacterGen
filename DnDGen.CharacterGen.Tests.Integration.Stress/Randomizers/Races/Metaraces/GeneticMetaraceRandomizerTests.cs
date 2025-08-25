@@ -1,7 +1,7 @@
-﻿using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.Races;
-using DnDGen.CharacterGen.Randomizers.Races.Metaraces;
+﻿using DnDGen.CharacterGen.Alignments.Randomizers;
+using DnDGen.CharacterGen.Races;
+using DnDGen.CharacterGen.Races.Randomizers;
+using DnDGen.CharacterGen.Races.Randomizers.Metaraces;
 using NUnit.Framework;
 using System.Collections.Generic;
 

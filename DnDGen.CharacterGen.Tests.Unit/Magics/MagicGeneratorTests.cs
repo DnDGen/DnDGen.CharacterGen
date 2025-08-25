@@ -2,11 +2,10 @@
 using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Generators.Magics;
 using DnDGen.CharacterGen.Items;
 using DnDGen.CharacterGen.Magics;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Selectors.Collections;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.TreasureGen.Items;

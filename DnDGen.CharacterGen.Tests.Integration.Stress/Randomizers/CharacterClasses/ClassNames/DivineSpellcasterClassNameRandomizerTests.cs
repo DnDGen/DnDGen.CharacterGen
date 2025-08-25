@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
 using NUnit.Framework;
 using System.Collections.Generic;
 

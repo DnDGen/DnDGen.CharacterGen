@@ -1,6 +1,6 @@
 ﻿using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Randomizers.Races;
+using DnDGen.CharacterGen.Races.Randomizers;
 using System.Collections.Generic;
 
 namespace DnDGen.CharacterGen.Races

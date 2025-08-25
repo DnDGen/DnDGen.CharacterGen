@@ -1,6 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Selectors.Collections;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.Infrastructure.Selectors.Percentiles;

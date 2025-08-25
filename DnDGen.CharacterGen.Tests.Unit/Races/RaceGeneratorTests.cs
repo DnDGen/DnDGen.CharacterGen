@@ -1,9 +1,8 @@
 ﻿using DnDGen.CharacterGen.Alignments;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Generators.Races;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Races;
-using DnDGen.CharacterGen.Selectors.Collections;
+using DnDGen.CharacterGen.Races.Randomizers;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.Infrastructure.Selectors.Percentiles;

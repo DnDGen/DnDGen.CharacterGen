@@ -1,7 +1,7 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Selectors.Selections;
+using DnDGen.CharacterGen.Feats.Selectors;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;

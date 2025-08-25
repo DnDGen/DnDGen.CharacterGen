@@ -1,12 +1,12 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.CharacterClasses;
-using DnDGen.CharacterGen.Selectors.Collections;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.Infrastructure.Selectors.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DnDGen.CharacterGen.Languages.Selectors;
 
 namespace DnDGen.CharacterGen.Languages
 {

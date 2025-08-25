@@ -1,7 +1,7 @@
 ﻿using DnDGen.CharacterGen.Alignments;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.ClassNames;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses.Levels;
 using System.Collections.Generic;
 
 namespace DnDGen.CharacterGen.CharacterClasses

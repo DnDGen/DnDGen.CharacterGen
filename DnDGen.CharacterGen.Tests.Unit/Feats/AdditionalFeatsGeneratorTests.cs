@@ -2,9 +2,9 @@
 using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Combats;
 using DnDGen.CharacterGen.Feats;
+using DnDGen.CharacterGen.Feats.Selectors;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Selectors.Collections;
-using DnDGen.CharacterGen.Selectors.Selections;
+using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Skills;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
@@ -44,8 +44,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             additionalFeatsGenerator = new AdditionalFeatsGenerator(mockCollectionsSelector.Object, mockFeatsSelector.Object, mockFeatFocusGenerator.Object, mockAdjustmentsSelector.Object);
             characterClass = new CharacterClass();
             race = new Race();
-            stats = new Dictionary<string, Ability>();
-            skills = new List<Skill>();
+            stats = [];
+            skills = [];
             additionalFeatSelections = new List<AdditionalFeatSelection>();
             baseAttack = new BaseAttack();
             stats[AbilityConstants.Intelligence] = new Ability(AbilityConstants.Intelligence);

@@ -1,7 +1,5 @@
 ﻿using DnDGen.CharacterGen.Abilities;
 using DnDGen.CharacterGen.Abilities.Randomizers;
-using DnDGen.CharacterGen.Generators.Randomizers.Abilities;
-using DnDGen.CharacterGen.Randomizers.Abilities;
 using DnDGen.RollGen;
 using Moq;
 using NUnit.Framework;
