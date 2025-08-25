@@ -1,15 +1,17 @@
 ﻿using DnDGen.CharacterGen.Abilities;
+using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.Alignments;
+using DnDGen.CharacterGen.Alignments.Randomizers;
 using DnDGen.CharacterGen.CharacterClasses;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
 using DnDGen.CharacterGen.Characters;
 using DnDGen.CharacterGen.Feats;
-using DnDGen.CharacterGen.Generators.Characters;
 using DnDGen.CharacterGen.Languages;
 using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Abilities;
-using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
-using DnDGen.CharacterGen.Randomizers.Races;
+using DnDGen.CharacterGen.Races.Randomizers;
+using DnDGen.CharacterGen.Races.Randomizers.BaseRaces;
+using DnDGen.CharacterGen.Races.Randomizers.Metaraces;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.TreasureGen.Items;
 using NUnit.Framework;
@@ -24,6 +26,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         private ICharacterGenerator characterGenerator;
         private ICollectionSelector collectionSelector;
         private CharacterAsserter characterAsserter;
+        private IAbilitiesRandomizer abilitiesRandomizer;
+        private RaceRandomizer metaraceRandomizer;
+        private RaceRandomizer baseRaceRandomizer;
+        private ILevelRandomizer levelRandomizer;
+        private IClassNameRandomizer classNameRandomizer;
+        private IAlignmentRandomizer alignmentRandomizer;
 
         [SetUp]
         public void Setup()
@@ -31,18 +39,18 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
             characterGenerator = GetNewInstanceOf<ICharacterGenerator>();
             collectionSelector = GetNewInstanceOf<ICollectionSelector>();
             characterAsserter = new CharacterAsserter();
+
+            abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Default);
+            metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.Default);
+            baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.Default);
+            levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Default);
+            classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.Default);
+            alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Default);
         }
 
         [Test]
         public void BUG_GenerateWith_ReturnsCharacter_WithoutMetarace()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
-            var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.AnyMeta);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
-            var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-
             //INFO: will try 2 times to see if we get a character without metarace. Should happen at least once, if not more than once
             var hasMeta = true;
             var attempts = 2;
@@ -75,9 +83,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateWith_ReturnsCharacter_SpecialistWizard()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
-            var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
+            metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
 
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
             baseRaceRandomizer.SetBaseRace = RaceConstants.BaseRaces.Human;
@@ -124,10 +130,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateFirstLevelCommoner()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
 
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             levelRandomizer.SetLevel = 1;
@@ -162,10 +165,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateHighLevelFighter()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
 
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             levelRandomizer.SetLevel = 20;
@@ -201,11 +201,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateStormGiant()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
-            var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
 
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
             baseRaceRandomizer.SetBaseRace = RaceConstants.BaseRaces.StormGiant;
@@ -247,8 +243,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         {
             var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Heroic);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
             var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.Spellcaster);
 
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
@@ -281,7 +275,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         {
             var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Heroic);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.VeryHigh);
 
             var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
@@ -322,13 +315,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateUndeadCharacter()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<IForcableMetaraceRandomizer>(RaceRandomizerTypeConstants.Metarace.UndeadMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
-            var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
-
             metaraceRandomizer.ForceMetarace = true;
 
             var character = characterGenerator.GenerateWith(
@@ -348,10 +335,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GeneratePlanetouchedCharacter()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
             var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.Spellcaster);
 
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
@@ -385,13 +369,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
 
         private Character GetGhost()
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<ISetMetaraceRandomizer>();
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
-            var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
-
             metaraceRandomizer.SetMetarace = RaceConstants.Metaraces.Ghost;
 
             return characterGenerator.GenerateWith(
@@ -538,9 +516,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [TestCase(RaceConstants.BaseRaces.Tiefling, 1, 1 / 2d)]
         public void BUG_NPCChallengeRating(string race, int level, double cr)
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyNPC);
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
@@ -697,9 +673,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [TestCase(RaceConstants.BaseRaces.Tiefling, 1, 1)]
         public void BUG_PCChallengeRating(string race, int level, double cr)
         {
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.NoMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             var classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
@@ -805,12 +779,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
                 { CharacterClassConstants.Wizard, 1 },
             };
 
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
-            var baseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AnyBase);
-            var metaraceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.Metarace.AnyMeta);
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
-            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
-
             var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
             var className = collectionSelector.SelectRandomFrom(minimums.Keys);
             classNameRandomizer.SetClassName = className;
@@ -834,12 +802,10 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateWerewolfLord_ChallengeRatingisCorrect()
         {
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
             var metaraceRandomizer = GetNewInstanceOf<ISetMetaraceRandomizer>();
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
 
             classNameRandomizer.SetClassName = CharacterClassConstants.Fighter;
             levelRandomizer.SetLevel = 10;
@@ -861,12 +827,10 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateHillGiantDireWereboar_ChallengeRatingisCorrect()
         {
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();
             var metaraceRandomizer = GetNewInstanceOf<ISetMetaraceRandomizer>();
-            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
 
             classNameRandomizer.SetClassName = CharacterClassConstants.Fighter;
             levelRandomizer.SetLevel = 1;
@@ -889,7 +853,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
         [Test]
         public void BUG_GenerateMummyLord()
         {
-            var alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
             var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
             var levelRandomizer = GetNewInstanceOf<ISetLevelRandomizer>();
             var baseRaceRandomizer = GetNewInstanceOf<ISetBaseRaceRandomizer>();

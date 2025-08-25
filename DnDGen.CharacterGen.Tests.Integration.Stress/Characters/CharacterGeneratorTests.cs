@@ -1,7 +1,7 @@
-﻿using DnDGen.CharacterGen.Races;
-using DnDGen.CharacterGen.Randomizers.Abilities;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
-using DnDGen.CharacterGen.Randomizers.Races;
+﻿using DnDGen.CharacterGen.Abilities.Randomizers;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.Races;
+using DnDGen.CharacterGen.Races.Randomizers;
 using DnDGen.CharacterGen.Tests.Integration.Generators.Characters;
 using NUnit.Framework;
 
@@ -14,7 +14,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
         private IClassNameRandomizer spellcasterClassNameRandomizer;
         private RaceRandomizer aquaticBaseRaceRandomizer;
         private RaceRandomizer monsterBaseRaceRandomizer;
-        private IAbilitiesRandomizer rawAbilitiesRandomizer;
         private IAbilitiesRandomizer heroicAbilitiesRandomizer;
         private CharacterAsserter characterAsserter;
 
@@ -23,7 +22,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
         {
             characterAsserter = new CharacterAsserter();
             heroicAbilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Heroic);
-            rawAbilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.Raw);
             monsterBaseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.MonsterBase);
             aquaticBaseRaceRandomizer = GetNewInstanceOf<RaceRandomizer>(RaceRandomizerTypeConstants.BaseRace.AquaticBase);
             spellcasterClassNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.Spellcaster);
@@ -44,7 +42,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
                 levelRandomizer,
                 baseRaceRandomizer,
                 metaraceRandomizer,
-                rawAbilitiesRandomizer);
+                abilitiesRandomizer);
 
             characterAsserter.AssertCharacter(character);
             Assert.That(character.Class.IsNPC, Is.False, character.Summary);
@@ -64,7 +62,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
                 levelRandomizer,
                 monsterBaseRaceRandomizer,
                 metaraceRandomizer,
-                rawAbilitiesRandomizer);
+                abilitiesRandomizer);
 
             characterAsserter.AssertCharacter(character);
             Assert.That(character.Class.IsNPC, Is.False, character.Summary);
@@ -84,7 +82,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
                 levelRandomizer,
                 baseRaceRandomizer,
                 metaraceRandomizer,
-                rawAbilitiesRandomizer);
+                abilitiesRandomizer);
 
             characterAsserter.AssertCharacter(npc);
             Assert.That(npc.Class.IsNPC, Is.True);
@@ -104,7 +102,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
                 levelRandomizer,
                 aquaticBaseRaceRandomizer,
                 metaraceRandomizer,
-                rawAbilitiesRandomizer);
+                abilitiesRandomizer);
 
             characterAsserter.AssertCharacter(aquaticCharacter);
             Assert.That(aquaticCharacter.Class.IsNPC, Is.False, aquaticCharacter.Summary);

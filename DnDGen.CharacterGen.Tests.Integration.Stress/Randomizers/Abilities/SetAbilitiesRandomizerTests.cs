@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Abilities;
-using DnDGen.CharacterGen.Randomizers.Abilities;
+using DnDGen.CharacterGen.Abilities.Randomizers;
 using NUnit.Framework;
 using System;
 

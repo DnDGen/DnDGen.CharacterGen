@@ -1,8 +1,9 @@
-﻿using DnDGen.CharacterGen.Characters;
-using DnDGen.CharacterGen.Generators.Characters;
-using DnDGen.CharacterGen.Randomizers.Alignments;
-using DnDGen.CharacterGen.Randomizers.CharacterClasses;
-using DnDGen.CharacterGen.Randomizers.Races;
+﻿using DnDGen.CharacterGen.Abilities.Randomizers;
+using DnDGen.CharacterGen.Alignments.Randomizers;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
+using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
+using DnDGen.CharacterGen.Characters;
+using DnDGen.CharacterGen.Races.Randomizers;
 using DnDGen.CharacterGen.Verifiers;
 using DnDGen.Stress;
 using NUnit.Framework;
@@ -20,6 +21,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress
         protected ILevelRandomizer levelRandomizer;
         protected RaceRandomizer baseRaceRandomizer;
         protected RaceRandomizer metaraceRandomizer;
+        protected IAbilitiesRandomizer abilitiesRandomizer;
         protected ICharacterGenerator characterGenerator;
         protected Stressor stressor;
 
@@ -48,6 +50,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Stress
             levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Any);
             classNameRandomizer = GetNewInstanceOf<IClassNameRandomizer>(ClassNameRandomizerTypeConstants.AnyPlayer);
             alignmentRandomizer = GetNewInstanceOf<IAlignmentRandomizer>(AlignmentRandomizerTypeConstants.Any);
+            abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.BestOfFour);
             randomizerVerifier = GetNewInstanceOf<IRandomizerVerifier>();
         }
 

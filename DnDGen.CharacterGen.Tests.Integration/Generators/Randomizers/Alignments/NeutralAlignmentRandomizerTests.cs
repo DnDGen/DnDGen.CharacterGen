@@ -1,5 +1,5 @@
 ﻿using DnDGen.CharacterGen.Alignments;
-using DnDGen.CharacterGen.Randomizers.Alignments;
+using DnDGen.CharacterGen.Alignments.Randomizers;
 using NUnit.Framework;
 
 namespace DnDGen.CharacterGen.Tests.Integration.Generators.Randomizers.Alignments
