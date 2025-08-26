@@ -6,7 +6,6 @@ using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.TreasureGen.Generators;
 using DnDGen.TreasureGen.Items;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace DnDGen.CharacterGen.Items
@@ -26,7 +25,7 @@ namespace DnDGen.CharacterGen.Items
             this.treasureGenerator = treasureGenerator;
         }
 
-        public Equipment GenerateWith(IEnumerable<Feat> feats, CharacterClass characterClass, Race race)
+        public Equipment GenerateWith(FeatCollections feats, CharacterClass characterClass, Race race)
         {
             var equipment = new Equipment();
             var effectiveLevel = (int)Math.Max(1, characterClass.EffectiveLevel);
@@ -35,7 +34,7 @@ namespace DnDGen.CharacterGen.Items
             equipment.Armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
 
             var twoWeaponFeats = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, GroupConstants.TwoHanded);
-            var hasTwoWeaponFeats = feats.Any(f => twoWeaponFeats.Contains(f.Name));
+            var hasTwoWeaponFeats = feats.All.Any(f => twoWeaponFeats.Contains(f.Name));
 
             if (hasTwoWeaponFeats)
             {

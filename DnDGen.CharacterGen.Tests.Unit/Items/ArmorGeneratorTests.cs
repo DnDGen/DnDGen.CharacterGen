@@ -27,7 +27,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         private Mock<JustInTimeFactory> mockJustInTimeFactory;
         private Mock<Dice> mockDice;
         private IArmorGenerator armorGenerator;
-        private List<Feat> feats;
+        private List<Feat> additionalFeats;
+        private List<Feat> classFeats;
+        private List<Feat> racialFeats;
+        private FeatCollections feats;
         private CharacterClass characterClass;
         private List<string> armorProficiencyFeats;
         private List<string> shieldProficiencyFeats;
@@ -50,15 +53,24 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice = new Mock<Dice>();
             armorGenerator = new ArmorGenerator(mockCollectionsSelector.Object, mockPercentileSelector.Object, mockJustInTimeFactory.Object, mockDice.Object);
 
-            feats = new List<Feat>();
+            additionalFeats = [];
+            classFeats = [];
+            racialFeats = [];
+            feats = new FeatCollections
+            {
+                Additional = additionalFeats,
+                Class = classFeats,
+                Racial = racialFeats
+            };
             characterClass = new CharacterClass();
-            armorProficiencyFeats = new List<string>();
-            shieldProficiencyFeats = new List<string>();
-            proficientArmors = new List<string>();
-            proficientShields = new List<string>();
-            race = new Race();
-
-            race.Size = "size";
+            armorProficiencyFeats = [];
+            shieldProficiencyFeats = [];
+            proficientArmors = [];
+            proficientShields = [];
+            race = new Race
+            {
+                Size = "size"
+            };
             magicalArmor = CreateArmor("magical armor");
             magicalArmor.IsMagical = true;
             magicalShield = CreateShield("magical shield");
@@ -78,11 +90,11 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             proficientShields.Add("specific metal shield");
 
             characterClass.Level = 9266;
-            feats.Add(new Feat { Name = "light proficiency" });
-            feats.Add(new Feat { Name = "shield proficiency" });
-            feats.Add(new Feat { Name = "other feat" });
-            armorProficiencyFeats.Add(feats[0].Name);
-            shieldProficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = FeatConstants.LightArmorProficiency });
+            additionalFeats.Add(new Feat { Name = FeatConstants.ShieldProficiency });
+            additionalFeats.Add(new Feat { Name = "other feat" });
+            armorProficiencyFeats.Add(FeatConstants.LightArmorProficiency);
+            shieldProficiencyFeats.Add(FeatConstants.ShieldProficiency);
 
             powerTableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.Level);
             power = "my power";
@@ -95,8 +107,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, AttributeConstants.Shield + GroupConstants.Proficiency))
                 .Returns(shieldProficiencyFeats);
-            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, feats[0].Name)).Returns(proficientArmors);
-            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, feats[1].Name)).Returns(proficientShields);
+            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.LightArmorProficiency)).Returns(proficientArmors);
+            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.ShieldProficiency).Returns(proficientShields);
 
             var index = 0;
 

@@ -244,7 +244,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator
                 .Setup(g => g.GenerateBaseAttackWith(It.IsAny<CharacterClass>(), It.IsAny<Race>(), It.IsAny<Dictionary<string, Ability>>()))
                 .Returns(() => new BaseAttack());
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), It.IsAny<CharacterClass>(), It.IsAny<Race>())).Returns(() => new Equipment());
+            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<FeatCollections>(), It.IsAny<CharacterClass>(), It.IsAny<Race>())).Returns(() => new Equipment());
             mockCombatGenerator
                 .Setup(g => g.GenerateWith(
                     It.IsAny<BaseAttack>(),
@@ -292,8 +292,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator.Setup(g => g.GenerateBaseAttackWith(characterClass, race, abilities)).Returns(baseAttack);
             mockFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, abilities, skills, baseAttack)).Returns(featCollections);
 
-            //INFO: Because the "All" on feat collections is dynamic, we can't test for it specifically
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), characterClass, race)).Returns(equipment);
+            mockTreasureGenerator.Setup(g => g.GenerateWith(featCollections, characterClass, race)).Returns(equipment);
             mockCombatGenerator.Setup(g => g.GenerateWith(baseAttack, characterClass, race, It.IsAny<IEnumerable<Feat>>(), abilities, equipment)).Returns(combat);
             mockMagicGenerator.Setup(g => g.GenerateWith(alignment, characterClass, race, abilities, It.IsAny<IEnumerable<Feat>>(), equipment)).Returns(magic);
         }
@@ -400,8 +399,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator.Setup(g => g.GenerateBaseAttackWith(otherClass, race, abilities)).Returns(baseAttack);
             mockFeatsGenerator.Setup(g => g.GenerateWith(otherClass, race, abilities, skills, baseAttack)).Returns(featCollections);
 
-            //INFO: Because the "All" on feat collections is dynamic, we can't test for it specifically
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), otherClass, race)).Returns(equipment);
+            mockTreasureGenerator.Setup(g => g.GenerateWith(featCollections, otherClass, race)).Returns(equipment);
             mockCombatGenerator.Setup(g => g.GenerateWith(baseAttack, otherClass, race, It.IsAny<IEnumerable<Feat>>(), abilities, equipment)).Returns(combat);
             mockMagicGenerator.Setup(g => g.GenerateWith(alignment, otherClass, race, abilities, It.IsAny<IEnumerable<Feat>>(), equipment)).Returns(magic);
 
@@ -450,8 +448,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator.Setup(g => g.GenerateBaseAttackWith(characterClass, otherRace, abilities)).Returns(baseAttack);
             mockFeatsGenerator.Setup(g => g.GenerateWith(characterClass, otherRace, abilities, skills, baseAttack)).Returns(featCollections);
 
-            //INFO: Because the "All" on feat collections is dynamic, we can't test for it specifically
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), characterClass, otherRace)).Returns(equipment);
+            mockTreasureGenerator.Setup(g => g.GenerateWith(featCollections, characterClass, otherRace)).Returns(equipment);
             mockCombatGenerator.Setup(g => g.GenerateWith(baseAttack, characterClass, otherRace, It.IsAny<IEnumerable<Feat>>(), abilities, equipment)).Returns(combat);
             mockMagicGenerator.Setup(g => g.GenerateWith(alignment, characterClass, otherRace, abilities, It.IsAny<IEnumerable<Feat>>(), equipment)).Returns(magic);
 
@@ -498,8 +495,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator.Setup(g => g.GenerateBaseAttackWith(characterClass, otherRace, abilities)).Returns(baseAttack);
             mockFeatsGenerator.Setup(g => g.GenerateWith(characterClass, otherRace, abilities, skills, baseAttack)).Returns(featCollections);
 
-            //INFO: Because the "All" on feat collections is dynamic, we can't test for it specifically
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), characterClass, otherRace)).Returns(equipment);
+            mockTreasureGenerator.Setup(g => g.GenerateWith(featCollections, characterClass, otherRace)).Returns(equipment);
             mockCombatGenerator.Setup(g => g.GenerateWith(baseAttack, characterClass, otherRace, It.IsAny<IEnumerable<Feat>>(), abilities, equipment)).Returns(combat);
             mockMagicGenerator.Setup(g => g.GenerateWith(alignment, characterClass, otherRace, abilities, It.IsAny<IEnumerable<Feat>>(), equipment)).Returns(magic);
 
@@ -532,8 +528,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
             mockCombatGenerator.Setup(g => g.GenerateBaseAttackWith(characterClass, otherRace, abilities)).Returns(baseAttack);
             mockFeatsGenerator.Setup(g => g.GenerateWith(characterClass, otherRace, abilities, skills, baseAttack)).Returns(featCollections);
 
-            //INFO: Because the "All" on feat collections is dynamic, we can't test for it specifically
-            mockTreasureGenerator.Setup(g => g.GenerateWith(It.IsAny<IEnumerable<Feat>>(), characterClass, otherRace)).Returns(equipment);
+            mockTreasureGenerator.Setup(g => g.GenerateWith(featCollections, characterClass, otherRace)).Returns(equipment);
             mockCombatGenerator.Setup(g => g.GenerateWith(baseAttack, characterClass, otherRace, It.IsAny<IEnumerable<Feat>>(), abilities, equipment)).Returns(combat);
             mockMagicGenerator.Setup(g => g.GenerateWith(alignment, characterClass, otherRace, abilities, It.IsAny<IEnumerable<Feat>>(), equipment)).Returns(magic);
 
