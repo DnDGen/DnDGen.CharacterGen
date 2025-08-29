@@ -51,6 +51,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockMagicalArmorGenerator = new Mock<MagicalItemGenerator>();
             mockJustInTimeFactory = new Mock<JustInTimeFactory>();
             mockDice = new Mock<Dice>();
+
+            mockJustInTimeFactory.Setup(f => f.Build<MundaneItemGenerator>(ItemTypeConstants.Armor)).Returns(mockMundaneArmorGenerator.Object);
+            mockJustInTimeFactory.Setup(f => f.Build<MagicalItemGenerator>(ItemTypeConstants.Armor)).Returns(mockMagicalArmorGenerator.Object);
+
             armorGenerator = new ArmorGenerator(mockCollectionsSelector.Object, mockPercentileSelector.Object, mockJustInTimeFactory.Object, mockDice.Object);
 
             additionalFeats = [];
@@ -107,14 +111,25 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, AttributeConstants.Shield + GroupConstants.Proficiency))
                 .Returns(shieldProficiencyFeats);
-            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.LightArmorProficiency)).Returns(proficientArmors);
-            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.ShieldProficiency).Returns(proficientShields);
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.LightArmorProficiency))
+                .Returns(proficientArmors);
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.ShieldProficiency))
+                .Returns(proficientShields);
 
             var index = 0;
 
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(It.IsAny<IEnumerable<string>>()))
                 .Returns((IEnumerable<string> ss) => ss.ElementAt(index++ % ss.Count()));
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>()))
+                .Returns((IEnumerable<string> c, IEnumerable<string> u, IEnumerable<string> r, IEnumerable<string> vr) => GetWeightedRandom(c, u, r, vr, index++));
 
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Specific))
@@ -129,18 +144,28 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                     .Union(proficientShields)
                     .Where(a => a.Contains("metal")));
 
-            mockJustInTimeFactory.Setup(f => f.Build<MundaneItemGenerator>(ItemTypeConstants.Armor)).Returns(mockMundaneArmorGenerator.Object);
-            mockJustInTimeFactory.Setup(f => f.Build<MagicalItemGenerator>(ItemTypeConstants.Armor)).Returns(mockMagicalArmorGenerator.Object);
-
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.IsAny<int>())).Returns(false);
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.IsAny<double>())).Returns(false);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(It.IsAny<int>())).Returns(false);
         }
 
+        private static string GetWeightedRandom(IEnumerable<string> common, IEnumerable<string> uncommon, IEnumerable<string> rare, IEnumerable<string> veryRare, int index)
+        {
+            common ??= [];
+            uncommon ??= [];
+            rare ??= [];
+            veryRare ??= [];
+
+            var all = common.Concat(uncommon).Concat(rare).Concat(veryRare);
+            var total = all.Count();
+
+            return all.ElementAt(index % total);
+        }
+
         [Test]
         public void GenerateArmorFrom_GenerateNoArmor_WhenNotProficient()
         {
-            feats.Remove(feats[0]);
+            additionalFeats.Remove(additionalFeats[0]);
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.Null);
         }
@@ -152,7 +177,13 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var mundaneArmor = CreateArmor("mundane armor");
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("my random armor");
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    ProficientSet("my armor", "other armor", "metal armor", "mundane armor"),
+                    ProficientSet(),
+                    ProficientSet(),
+                    null))
+                .Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -164,23 +195,46 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
 
-            feats.Add(new Feat { Name = "heavy proficiency" });
+            additionalFeats.Add(new Feat { Name = FeatConstants.HeavyArmorProficiency });
+            additionalFeats.Add(new Feat { Name = FeatConstants.MediumArmorProficiency });
             mockCollectionsSelector
-                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy proficiency"))
-                .Returns(new[] { "heavy armor", "other heavy armor" });
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.HeavyArmorProficiency))
+                .Returns(["heavy armor", "other heavy armor"]);
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.MediumArmorProficiency))
+                .Returns(["medium armor", "other medium armor"]);
 
             var mundaneArmor = CreateArmor("mundane armor");
             var heavyArmor = CreateArmor("heavy armor");
-            armorProficiencyFeats.Add("heavy proficiency");
+            var mediumArmor = CreateArmor("medium armor");
+            armorProficiencyFeats.Add(FeatConstants.HeavyArmorProficiency);
             proficientArmors.Remove("heavy armor");
+            proficientArmors.Remove("medium armor");
 
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "heavy armor", "other heavy armor", "mundane armor")))
+                .Setup(s => s.SelectRandomFrom(
+                    ProficientSet(FeatConstants.HeavyArmorProficiency),
+                    ProficientSet(FeatConstants.MediumArmorProficiency),
+                    ProficientSet(FeatConstants.LightArmorProficiency),
+                    null))
+                .Returns(FeatConstants.HeavyArmorProficiency);
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    ProficientSet("heavy armor", "other heavy armor"),
+                    ProficientSet(),
+                    ProficientSet(),
+                    null))
                 .Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(heavyArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(heavyArmor));
+        }
+
+        [Test]
+        public void GenerateArmorFrom_GenerateMundaneArmor_FromRandom()
+        {
+            Assert.That("not yet written", Is.Empty);
         }
 
         [Test]
@@ -259,17 +313,19 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             Assert.That(armor, Is.EqualTo(mundaneArmor));
         }
 
-        private IEnumerable<string> ProficientSet(params string[] expected)
+        private static IEnumerable<string> ProficientSet(params string[] expected)
         {
             return It.Is<IEnumerable<string>>(ss => ss.Intersect(expected).Count() == expected.Length && ss.Count() == expected.Length);
         }
 
         private Armor CreateArmor(string name)
         {
-            var armor = new Armor();
-            armor.Name = name;
-            armor.ItemType = ItemTypeConstants.Armor;
-            armor.Size = race.Size;
+            var armor = new Armor
+            {
+                Name = name,
+                ItemType = ItemTypeConstants.Armor,
+                Size = race.Size
+            };
 
             proficientArmors.Add(name);
 
@@ -289,10 +345,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateArmorFrom_GenerateMagicalArmor_UseCumulativeProficiencies()
         {
-            feats.Add(new Feat { Name = "heavy proficiency" });
+            additionalFeats.Add(new Feat { Name = "heavy proficiency" });
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy proficiency"))
-                .Returns(new[] { "heavy armor", "other heavy armor" });
+                .Returns(["heavy armor", "other heavy armor"]);
 
             var heavyArmor = CreateArmor("heavy armor");
             armorProficiencyFeats.Add("heavy proficiency");
@@ -685,7 +741,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateShieldFrom_GenerateNoShield_WhenNotProficient()
         {
-            feats.Remove(feats[0]);
+            additionalFeats.Remove(additionalFeats[0]);
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.Null);
         }
@@ -709,10 +765,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
 
-            feats.Add(new Feat { Name = "heavy shield proficiency" });
+            additionalFeats.Add(new Feat { Name = "heavy shield proficiency" });
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy shield proficiency"))
-                .Returns(new[] { "heavy shield", "other heavy shield" });
+                .Returns(["heavy shield", "other heavy shield"]);
 
             var mundaneShield = CreateShield("mundane shield");
             var heavyShield = CreateShield("heavy shield");
@@ -819,10 +875,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateShieldFrom_GenerateMagicalShield_UseCumulativeProficiencies()
         {
-            feats.Add(new Feat { Name = "heavy shield proficiency" });
+            additionalFeats.Add(new Feat { Name = "heavy shield proficiency" });
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy shield proficiency"))
-                .Returns(new[] { "heavy shield", "other heavy shield" });
+                .Returns(["heavy shield", "other heavy shield"]);
 
             var heavyShield = CreateShield("heavy shield");
             shieldProficiencyFeats.Add("heavy shield proficiency");

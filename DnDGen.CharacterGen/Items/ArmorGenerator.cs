@@ -15,7 +15,11 @@ using System.Linq;
 
 namespace DnDGen.CharacterGen.Items
 {
-    internal class ArmorGenerator(ICollectionSelector collectionsSelector, IPercentileSelector percentileSelector, JustInTimeFactory justInTimeFactory, Dice dice) : IArmorGenerator
+    internal class ArmorGenerator(
+        ICollectionSelector collectionsSelector,
+        IPercentileSelector percentileSelector,
+        JustInTimeFactory justInTimeFactory,
+        Dice dice) : IArmorGenerator
     {
         private readonly ICollectionSelector collectionsSelector = collectionsSelector;
         private readonly IPercentileSelector percentileSelector = percentileSelector;
@@ -95,13 +99,13 @@ namespace DnDGen.CharacterGen.Items
 
         private string GetPreferredArmor(FeatCollections feats, string armorType, CharacterClass characterClass, string power)
         {
-            //INFO: Need to filter out specific armors, if they aren't a possibility
-            //Even though TreasureGen can handle specific armors from base versions, there are some specific armors that jump proficiency categories,
-            //such as full plate of speed being medium proficiency instead of heavy
-            var isSpecific = false;
             var specificThreshold = GetSpecificThreshold(power);
             var rollAgainThreshold = GetRollAgainThreshold(power);
 
+            //INFO: Need to filter out specific armors, if they aren't a possibility
+            //Even though TreasureGen can handle specific armors from base versions, there are some specific armors that jump proficiency categories,
+            //such as full plate of speed being medium proficiency instead of heavy
+            bool isSpecific;
             do
             {
                 isSpecific = dice.Roll().Percentile().AsTrueOrFalse(specificThreshold);
@@ -134,7 +138,7 @@ namespace DnDGen.CharacterGen.Items
             var proficiencyFeatNames = proficiencyFeats.Select(f => f.Name);
             var commonArmorFeatNames = new[] { FeatConstants.HeavyArmorProficiency, FeatConstants.TowerShieldProficiency };
             var uncommonArmorFeatNames = new[] { FeatConstants.MediumArmorProficiency, FeatConstants.ShieldProficiency };
-            var rareArmorFeatNames = new[] { FeatConstants.LightArmorProficiency, FeatConstants.ShieldProficiency };
+            var rareArmorFeatNames = new[] { FeatConstants.LightArmorProficiency };
 
             var preferredFeatName = collectionsSelector.SelectRandomFrom(
                 proficiencyFeatNames.Intersect(commonArmorFeatNames),

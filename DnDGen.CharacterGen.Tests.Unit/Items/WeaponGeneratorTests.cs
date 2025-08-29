@@ -26,7 +26,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         private Mock<ICollectionSelector> mockCollectionsSelector;
         private Mock<JustInTimeFactory> mockJustInTimeFactory;
         private Weapon magicalWeapon;
-        private List<Feat> feats;
+        private FeatCollections feats;
+        private List<Feat> additionalFeats;
+        private List<Feat> classFeats;
+        private List<Feat> racialFeats;
         private List<string> proficiencyFeats;
         private CharacterClass characterClass;
         private List<string> allWeapons;
@@ -47,27 +50,36 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockMagicalWeaponGenerator = new Mock<MagicalItemGenerator>();
             mockCollectionsSelector = new Mock<ICollectionSelector>();
             mockJustInTimeFactory = new Mock<JustInTimeFactory>();
-            weaponGenerator = new WeaponGenerator(mockCollectionsSelector.Object, mockPercentileSelector.Object, mockJustInTimeFactory.Object);
-            magicalWeapon = new Weapon();
-            feats = new List<Feat>();
-            characterClass = new CharacterClass();
-            proficiencyFeats = new List<string>();
-            allWeapons = new List<string>();
-            allAmmunitions = new List<string>();
-            allMeleeWeapons = new List<string>();
-            allRangedWeapons = new List<string>();
-            allTwoHandedWeapons = new List<string>();
-            allProficientWeapons = new List<string>();
-            race = new Race();
 
-            race.Size = "size";
-            race.BaseRace = "base race";
+            mockJustInTimeFactory.Setup(f => f.Build<MundaneItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMundaneWeaponGenerator.Object);
+            mockJustInTimeFactory.Setup(f => f.Build<MagicalItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMagicalWeaponGenerator.Object);
+
+            weaponGenerator = new WeaponGenerator(mockCollectionsSelector.Object, mockPercentileSelector.Object, mockJustInTimeFactory.Object);
+
+            magicalWeapon = new Weapon();
+            additionalFeats = [];
+            classFeats = [];
+            racialFeats = [];
+            feats = new FeatCollections { Additional = additionalFeats, Class = classFeats, Racial = racialFeats };
+            characterClass = new CharacterClass();
+            proficiencyFeats = [];
+            allWeapons = [];
+            allAmmunitions = [];
+            allMeleeWeapons = [];
+            allRangedWeapons = [];
+            allTwoHandedWeapons = [];
+            allProficientWeapons = [];
+            race = new Race
+            {
+                Size = "size",
+                BaseRace = "base race"
+            };
             magicalWeapon = CreateOneHandedMeleeWeapon("magical weapon");
             magicalWeapon.IsMagical = true;
             characterClass.Name = "class name";
             characterClass.Level = 9266;
-            feats.Add(new Feat { Name = "all proficiency", Foci = new[] { FeatConstants.Foci.All } });
-            proficiencyFeats.Add(feats[0].Name);
+            additionalFeats.Add(new Feat { Name = "all proficiency", Foci = [FeatConstants.Foci.All] });
+            proficiencyFeats.Add(additionalFeats[0].Name);
 
             allWeapons.Add("other weapon");
             allWeapons.Add("other melee");
@@ -98,18 +110,15 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, ItemTypeConstants.Weapon + GroupConstants.Proficiency))
                 .Returns(proficiencyFeats);
-            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatFoci, feats[0].Name)).Returns(allProficientWeapons);
+            mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatFoci, additionalFeats[0].Name)).Returns(allProficientWeapons);
             mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, ItemTypeConstants.Weapon)).Returns(allWeapons);
             mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Ammunition)).Returns(allAmmunitions);
             mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Melee)).Returns(allMeleeWeapons);
             mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Ranged)).Returns(allRangedWeapons);
             mockCollectionsSelector.Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.TwoHanded)).Returns(allTwoHandedWeapons);
-
-            mockJustInTimeFactory.Setup(f => f.Build<MundaneItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMundaneWeaponGenerator.Object);
-            mockJustInTimeFactory.Setup(f => f.Build<MagicalItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMagicalWeaponGenerator.Object);
         }
 
-        private IEnumerable<string> ProficientSet(params string[] expected)
+        private static IEnumerable<string> ProficientSet(params string[] expected)
         {
             return It.Is<IEnumerable<string>>(ss => ss.Intersect(expected).Count() == expected.Length && ss.Count() == expected.Length);
         }
@@ -117,12 +126,12 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateFrom_GenerateNoWeapon()
         {
-            feats.Add(new Feat { Name = "feat 1" });
-            feats.Add(new Feat { Name = "feat 2", Foci = new[] { FeatConstants.Foci.UnarmedStrike } });
+            additionalFeats.Add(new Feat { Name = "feat 1" });
+            additionalFeats.Add(new Feat { Name = "feat 2", Foci = new[] { FeatConstants.Foci.UnarmedStrike } });
 
             proficiencyFeats.Clear();
-            proficiencyFeats.Add(feats[1].Name);
-            proficiencyFeats.Add(feats[2].Name);
+            proficiencyFeats.Add(additionalFeats[1].Name);
+            proficiencyFeats.Add(additionalFeats[2].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.Null);
@@ -211,8 +220,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(mundaneWeapon));
@@ -230,9 +239,9 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(mundaneWeapon));
@@ -250,8 +259,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
-            feats.Add(new Feat { Name = FeatConstants.WeaponFamiliarity, Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = FeatConstants.WeaponFamiliarity, Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(mundaneWeapon), weapon.Name);
@@ -271,10 +280,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(multipleSpecialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(otherMundaneWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = multipleSpecialties });
-            feats.Add(new Feat { Name = "feat4", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = multipleSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat4", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(otherMundaneWeapon), weapon.Name);
@@ -291,8 +300,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(mundaneWeapon));
@@ -311,10 +320,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(multipleSpecialties))).Returns("my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(otherMundaneWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = multipleSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
-            proficiencyFeats.Add(feats[2].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = multipleSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
+            proficiencyFeats.Add(additionalFeats[2].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(otherMundaneWeapon));
@@ -352,8 +361,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.SetupSequence(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon).Returns(wrongMagicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = new[] { magicalWeapon.Name } });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = new[] { magicalWeapon.Name } });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(magicalWeapon));
@@ -369,9 +378,9 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(magicalWeapon));
@@ -387,8 +396,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
 
-            feats.Add(new Feat { Name = FeatConstants.WeaponFamiliarity, Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = FeatConstants.WeaponFamiliarity, Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(magicalWeapon), weapon.Name);
@@ -406,10 +415,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(multipleSpecialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(otherMagicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = multipleSpecialties });
-            feats.Add(new Feat { Name = "feat4", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = multipleSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat4", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(otherMagicalWeapon));
@@ -424,8 +433,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(magicalWeapon));
@@ -443,10 +452,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(multipleSpecialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(otherMagicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = multipleSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
-            proficiencyFeats.Add(feats[1].Name);
-            proficiencyFeats.Add(feats[2].Name);
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = multipleSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
+            proficiencyFeats.Add(additionalFeats[1].Name);
+            proficiencyFeats.Add(additionalFeats[2].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.EqualTo(otherMagicalWeapon));
@@ -465,8 +474,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateFrom_SaveBonusesOfAllDoNotCountAsProficiencyFeats()
         {
-            feats.Add(new Feat { Name = FeatConstants.SaveBonus, Foci = new[] { FeatConstants.Foci.All } });
-            feats[0].Foci = new[] { magicalWeapon.Name };
+            additionalFeats.Add(new Feat { Name = FeatConstants.SaveBonus, Foci = [FeatConstants.Foci.All] });
+            additionalFeats[0].Foci = [magicalWeapon.Name];
 
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(magicalWeapon.Name))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
@@ -533,8 +542,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(otherMagicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
@@ -552,8 +561,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).ToArray()))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
@@ -611,8 +620,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(otherMagicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
@@ -632,8 +641,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                 .Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon")).Returns(magicalWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
@@ -674,8 +683,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(rangedWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
@@ -694,8 +703,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("ranged weapon", "other ranged"))).Returns("my random weapon");
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(rangedWeapon);
 
-            feats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
-            feats.Add(new Feat { Name = "feat3", Foci = specialties });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = wrongSpecialties });
+            additionalFeats.Add(new Feat { Name = "feat3", Foci = specialties });
             proficiencyFeats.Add("feat3");
 
             var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
@@ -732,7 +741,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateRangedFrom_GenerateNoRangedWeapon()
         {
-            feats.Add(new Feat { Name = "feat2", Foci = new[] { magicalWeapon.Name } });
+            additionalFeats.Add(new Feat { Name = "feat2", Foci = [magicalWeapon.Name] });
             proficiencyFeats.Add("feat2");
 
             var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
