@@ -12,6 +12,7 @@ using DnDGen.TreasureGen.Items.Magical;
 using DnDGen.TreasureGen.Items.Mundane;
 using Moq;
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,8 +33,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         private List<Feat> racialFeats;
         private FeatCollections feats;
         private CharacterClass characterClass;
-        private List<string> armorProficiencyFeats;
-        private List<string> shieldProficiencyFeats;
+        private string[] armorProficiencyFeats;
+        private string[] shieldProficiencyFeats;
         private List<string> proficientArmors;
         private List<string> proficientShields;
         private Armor magicalArmor;
@@ -67,8 +68,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                 Racial = racialFeats
             };
             characterClass = new CharacterClass();
-            armorProficiencyFeats = [];
-            shieldProficiencyFeats = [];
+            armorProficiencyFeats = [FeatConstants.LightArmorProficiency, FeatConstants.MediumArmorProficiency, FeatConstants.HeavyArmorProficiency];
+            shieldProficiencyFeats = [FeatConstants.ShieldProficiency, FeatConstants.TowerShieldProficiency];
             proficientArmors = [];
             proficientShields = [];
             race = new Race
@@ -97,8 +98,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             additionalFeats.Add(new Feat { Name = FeatConstants.LightArmorProficiency });
             additionalFeats.Add(new Feat { Name = FeatConstants.ShieldProficiency });
             additionalFeats.Add(new Feat { Name = "other feat" });
-            armorProficiencyFeats.Add(FeatConstants.LightArmorProficiency);
-            shieldProficiencyFeats.Add(FeatConstants.ShieldProficiency);
 
             powerTableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.Level);
             power = "my power";
@@ -207,7 +206,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var mundaneArmor = CreateArmor("mundane armor");
             var heavyArmor = CreateArmor("heavy armor");
             var mediumArmor = CreateArmor("medium armor");
-            armorProficiencyFeats.Add(FeatConstants.HeavyArmorProficiency);
             proficientArmors.Remove("heavy armor");
             proficientArmors.Remove("medium armor");
 
@@ -231,10 +229,119 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             Assert.That(armor, Is.EqualTo(heavyArmor));
         }
 
-        [Test]
-        public void GenerateArmorFrom_GenerateMundaneArmor_FromRandom()
+        [TestCaseSource(nameof(RandomArmorData))]
+        public void GenerateArmorFrom_GenerateMundaneArmor_FromRandom(
+            FeatCollections featCollection,
+            RandomWeightedCollection randomFeats,
+            RandomWeightedCollection randomWeapons)
         {
-            Assert.That("not yet written", Is.Empty);
+            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.HeavyArmorProficiency))
+                .Returns(["heavy armor", "other heavy armor"]);
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.MediumArmorProficiency))
+                .Returns(["medium armor", "other medium armor"]);
+            mockCollectionsSelector
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.LightArmorProficiency))
+                .Returns(["light armor", "other light armor"]);
+
+            var expectedArmor = CreateArmor(randomWeapons.Expected);
+
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    ProficientSet(randomFeats.Common),
+                    ProficientSet(randomFeats.Uncommon),
+                    ProficientSet(randomFeats.Rare),
+                    null))
+                .Returns(randomFeats.Expected);
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    ProficientSet(randomWeapons.Common),
+                    ProficientSet(randomWeapons.Uncommon),
+                    ProficientSet(randomWeapons.Rare),
+                    null))
+                .Returns(randomWeapons.Expected);
+            mockMundaneArmorGenerator.Setup(g => g.Generate(randomWeapons.Expected, race.Size)).Returns(expectedArmor);
+
+            var armor = armorGenerator.GenerateArmorFrom(featCollection, characterClass, race);
+
+            mockCollectionsSelector.Verify(s => s.SelectRandomFrom(
+                ProficientSet(randomFeats.Common),
+                ProficientSet(randomFeats.Uncommon),
+                ProficientSet(randomFeats.Rare),
+                null), Times.Once);
+            mockCollectionsSelector.Verify(s => s.SelectRandomFrom(
+                ProficientSet(randomWeapons.Common),
+                ProficientSet(randomWeapons.Uncommon),
+                ProficientSet(randomWeapons.Rare),
+                null), Times.Once);
+            mockMundaneArmorGenerator.Verify(g => g.Generate(randomWeapons.Expected, race.Size), Times.Once);
+
+            Assert.That(armor, Is.EqualTo(expectedArmor));
+        }
+
+        private static IEnumerable RandomArmorData
+        {
+            get
+            {
+                yield return new TestCaseData(
+                    new FeatCollections
+                    {
+                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }]
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Rare = [FeatConstants.LightArmorProficiency],
+                        Expected = FeatConstants.LightArmorProficiency
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Rare = ["light armor", "other light armor"],
+                        Expected = "my random armor"
+                    }).SetArgDisplayNames("Racial L:L", "Random Armor");
+                yield return new TestCaseData(
+                    new FeatCollections
+                    {
+                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }, new() { Name = FeatConstants.MediumArmorProficiency }]
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Uncommon = [FeatConstants.MediumArmorProficiency],
+                        Rare = [FeatConstants.LightArmorProficiency],
+                        Expected = FeatConstants.LightArmorProficiency
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Rare = ["light armor", "other light armor"],
+                        Expected = "my random armor"
+                    }).SetArgDisplayNames("Racial LM:L", "Random Armor");
+                yield return new TestCaseData(
+                    new FeatCollections
+                    {
+                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }, new() { Name = FeatConstants.MediumArmorProficiency }]
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Uncommon = [FeatConstants.MediumArmorProficiency],
+                        Rare = [FeatConstants.LightArmorProficiency],
+                        Expected = FeatConstants.MediumArmorProficiency
+                    },
+                    new RandomWeightedCollection
+                    {
+                        Rare = ["medium armor", "other medium armor"],
+                        Expected = "my random armor"
+                    }).SetArgDisplayNames("Racial LM:M", "Random Armor");
+            }
+        }
+
+        public class RandomWeightedCollection
+        {
+            public string[] Common { get; set; } = [];
+            public string[] Uncommon { get; set; } = [];
+            public string[] Rare { get; set; } = [];
+            public string Expected { get; set; }
         }
 
         [Test]
@@ -345,13 +452,12 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateArmorFrom_GenerateMagicalArmor_UseCumulativeProficiencies()
         {
-            additionalFeats.Add(new Feat { Name = "heavy proficiency" });
+            additionalFeats.Add(new Feat { Name = FeatConstants.HeavyArmorProficiency });
             mockCollectionsSelector
-                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy proficiency"))
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.HeavyArmorProficiency))
                 .Returns(["heavy armor", "other heavy armor"]);
 
             var heavyArmor = CreateArmor("heavy armor");
-            armorProficiencyFeats.Add("heavy proficiency");
             proficientArmors.Remove("heavy armor");
 
             mockCollectionsSelector
@@ -765,14 +871,13 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
 
-            additionalFeats.Add(new Feat { Name = "heavy shield proficiency" });
+            additionalFeats.Add(new Feat { Name = FeatConstants.TowerShieldProficiency });
             mockCollectionsSelector
-                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy shield proficiency"))
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.TowerShieldProficiency))
                 .Returns(["heavy shield", "other heavy shield"]);
 
             var mundaneShield = CreateShield("mundane shield");
             var heavyShield = CreateShield("heavy shield");
-            shieldProficiencyFeats.Add("heavy shield proficiency");
             proficientShields.Remove("heavy shield");
 
             mockCollectionsSelector
@@ -875,13 +980,12 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateShieldFrom_GenerateMagicalShield_UseCumulativeProficiencies()
         {
-            additionalFeats.Add(new Feat { Name = "heavy shield proficiency" });
+            additionalFeats.Add(new Feat { Name = FeatConstants.TowerShieldProficiency });
             mockCollectionsSelector
-                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, "heavy shield proficiency"))
+                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.TowerShieldProficiency))
                 .Returns(["heavy shield", "other heavy shield"]);
 
             var heavyShield = CreateShield("heavy shield");
-            shieldProficiencyFeats.Add("heavy shield proficiency");
             proficientShields.Remove("heavy shield");
 
             mockCollectionsSelector

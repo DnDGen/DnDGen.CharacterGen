@@ -276,6 +276,18 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
                 if (feat.Name == FeatConstants.SaveBonus)
                     Assert.That(feat.Foci, Is.Not.Empty, character.Race.BaseRace);
             }
+
+            AssertDistinctFeatsWithfoci(character.Feats.Racial, $"{character.Summary}: Racial");
+            AssertDistinctFeatsWithfoci(character.Feats.Class, $"{character.Summary}: Class");
+            AssertDistinctFeatsWithfoci(character.Feats.Additional, $"{character.Summary}: Additional");
+        }
+
+        private void AssertDistinctFeatsWithfoci(IEnumerable<Feat> feats, string message)
+        {
+            var featsWithFoci = feats.Where(f => f.Foci.Any());
+            var featNames = featsWithFoci.Select(f => f.Name);
+
+            Assert.That(featNames, Is.Unique, message);
         }
 
         private void AssertEquipment(Character character)
