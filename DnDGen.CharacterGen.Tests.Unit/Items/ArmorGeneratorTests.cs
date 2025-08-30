@@ -12,6 +12,7 @@ using DnDGen.TreasureGen.Items.Magical;
 using DnDGen.TreasureGen.Items.Mundane;
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ using System.Linq;
 namespace DnDGen.CharacterGen.Tests.Unit.Items
 {
     [TestFixture]
-    public class ArmorGeneratorTests
+    public partial class ArmorGeneratorTests
     {
         private Mock<ICollectionSelector> mockCollectionsSelector;
         private Mock<IPercentileSelector> mockPercentileSelector;
@@ -176,17 +177,22 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var mundaneArmor = CreateArmor("mundane armor");
 
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    ProficientSet("my armor", "other armor", "metal armor", "mundane armor"),
-                    ProficientSet(),
-                    ProficientSet(),
-                    null))
-                .Returns("my random armor");
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor", "mundane armor"], "my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(mundaneArmor));
+        }
+
+        private void SetupSelectRandomArmor(string[] armors, string expected)
+        {
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    RandomWeightedCollection<string>.EquivalentSet(armors),
+                    RandomWeightedCollection<string>.EquivalentSet(),
+                    RandomWeightedCollection<string>.EquivalentSet(),
+                    null))
+                .Returns(expected);
         }
 
         [Test]
@@ -198,10 +204,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             additionalFeats.Add(new Feat { Name = FeatConstants.MediumArmorProficiency });
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.HeavyArmorProficiency))
-                .Returns(["heavy armor", "other heavy armor"]);
+                .Returns(RandomArmorPermutation.HeavyArmors);
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.MediumArmorProficiency))
-                .Returns(["medium armor", "other medium armor"]);
+                .Returns(RandomArmorPermutation.MediumArmors);
 
             var mundaneArmor = CreateArmor("mundane armor");
             var heavyArmor = CreateArmor("heavy armor");
@@ -211,16 +217,16 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(
-                    ProficientSet(FeatConstants.HeavyArmorProficiency),
-                    ProficientSet(FeatConstants.MediumArmorProficiency),
-                    ProficientSet(FeatConstants.LightArmorProficiency),
+                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.HeavyArmorProficiency),
+                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.MediumArmorProficiency),
+                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.LightArmorProficiency),
                     null))
                 .Returns(FeatConstants.HeavyArmorProficiency);
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(
-                    ProficientSet("heavy armor", "other heavy armor"),
-                    ProficientSet(),
-                    ProficientSet(),
+                    RandomWeightedCollection<string>.EquivalentSet(RandomArmorPermutation.HeavyArmors),
+                    RandomWeightedCollection<string>.EquivalentSet(),
+                    RandomWeightedCollection<string>.EquivalentSet(),
                     null))
                 .Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(heavyArmor);
@@ -230,54 +236,37 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [TestCaseSource(nameof(RandomArmorData))]
-        public void GenerateArmorFrom_GenerateMundaneArmor_FromRandom(
-            FeatCollections featCollection,
-            RandomWeightedCollection randomFeats,
-            RandomWeightedCollection randomWeapons)
+        public void GenerateArmorFrom_GenerateMundaneArmor_FromRandom(RandomArmorPermutation permutation)
         {
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
 
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.HeavyArmorProficiency))
-                .Returns(["heavy armor", "other heavy armor"]);
+                .Returns(RandomArmorPermutation.HeavyArmors);
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.MediumArmorProficiency))
-                .Returns(["medium armor", "other medium armor"]);
+                .Returns(RandomArmorPermutation.MediumArmors);
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, FeatConstants.LightArmorProficiency))
-                .Returns(["light armor", "other light armor"]);
+                .Returns(RandomArmorPermutation.LightArmors);
 
-            var expectedArmor = CreateArmor(randomWeapons.Expected);
+            var expectedArmor = CreateArmor(permutation.Armors.Expected);
 
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    ProficientSet(randomFeats.Common),
-                    ProficientSet(randomFeats.Uncommon),
-                    ProficientSet(randomFeats.Rare),
-                    null))
-                .Returns(randomFeats.Expected);
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    ProficientSet(randomWeapons.Common),
-                    ProficientSet(randomWeapons.Uncommon),
-                    ProficientSet(randomWeapons.Rare),
-                    null))
-                .Returns(randomWeapons.Expected);
-            mockMundaneArmorGenerator.Setup(g => g.Generate(randomWeapons.Expected, race.Size)).Returns(expectedArmor);
+            permutation.Racial.SetupMock(mockCollectionsSelector);
+            permutation.Class.SetupMock(mockCollectionsSelector);
+            permutation.Additional.SetupMock(mockCollectionsSelector);
+            permutation.Armors.SetupMock(mockCollectionsSelector);
 
-            var armor = armorGenerator.GenerateArmorFrom(featCollection, characterClass, race);
+            mockMundaneArmorGenerator.Setup(g => g.Generate(permutation.Armors.Expected, race.Size)).Returns(expectedArmor);
 
-            mockCollectionsSelector.Verify(s => s.SelectRandomFrom(
-                ProficientSet(randomFeats.Common),
-                ProficientSet(randomFeats.Uncommon),
-                ProficientSet(randomFeats.Rare),
-                null), Times.Once);
-            mockCollectionsSelector.Verify(s => s.SelectRandomFrom(
-                ProficientSet(randomWeapons.Common),
-                ProficientSet(randomWeapons.Uncommon),
-                ProficientSet(randomWeapons.Rare),
-                null), Times.Once);
-            mockMundaneArmorGenerator.Verify(g => g.Generate(randomWeapons.Expected, race.Size), Times.Once);
+            var armor = armorGenerator.GenerateArmorFrom(permutation.FeatCollection, characterClass, race);
+
+            permutation.Racial.VerifyMock(mockCollectionsSelector);
+            permutation.Class.VerifyMock(mockCollectionsSelector);
+            permutation.Additional.VerifyMock(mockCollectionsSelector);
+            permutation.Armors.VerifyMock(mockCollectionsSelector);
+
+            mockMundaneArmorGenerator.Verify(g => g.Generate(permutation.Armors.Expected, race.Size), Times.Once);
 
             Assert.That(armor, Is.EqualTo(expectedArmor));
         }
@@ -286,62 +275,154 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             get
             {
-                yield return new TestCaseData(
-                    new FeatCollections
-                    {
-                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }]
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Rare = [FeatConstants.LightArmorProficiency],
-                        Expected = FeatConstants.LightArmorProficiency
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Rare = ["light armor", "other light armor"],
-                        Expected = "my random armor"
-                    }).SetArgDisplayNames("Racial L:L", "Random Armor");
-                yield return new TestCaseData(
-                    new FeatCollections
-                    {
-                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }, new() { Name = FeatConstants.MediumArmorProficiency }]
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Uncommon = [FeatConstants.MediumArmorProficiency],
-                        Rare = [FeatConstants.LightArmorProficiency],
-                        Expected = FeatConstants.LightArmorProficiency
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Rare = ["light armor", "other light armor"],
-                        Expected = "my random armor"
-                    }).SetArgDisplayNames("Racial LM:L", "Random Armor");
-                yield return new TestCaseData(
-                    new FeatCollections
-                    {
-                        Racial = [new() { Name = FeatConstants.LightArmorProficiency }, new() { Name = FeatConstants.MediumArmorProficiency }]
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Uncommon = [FeatConstants.MediumArmorProficiency],
-                        Rare = [FeatConstants.LightArmorProficiency],
-                        Expected = FeatConstants.MediumArmorProficiency
-                    },
-                    new RandomWeightedCollection
-                    {
-                        Rare = ["medium armor", "other medium armor"],
-                        Expected = "my random armor"
-                    }).SetArgDisplayNames("Racial LM:M", "Random Armor");
+                var permutations = new[]
+                {
+                    new RandomArmorPermutation("R-L:L"),
+                    new RandomArmorPermutation("R-L:L;C-M:M"),
+                    new RandomArmorPermutation("R-L:L;C-M:M;A-H:H"),
+                    new RandomArmorPermutation("R-L:L;C-MH:M"),
+                    new RandomArmorPermutation("R-L:L;C-MH:H"),
+                    new RandomArmorPermutation("R-L:L;A-M:M"),
+                    new RandomArmorPermutation("R-L:L;A-MH:M"),
+                    new RandomArmorPermutation("R-L:L;A-MH:H"),
+                    new RandomArmorPermutation("R-LM:L"),
+                    new RandomArmorPermutation("R-LM:L;C-H:H"),
+                    new RandomArmorPermutation("R-LM:L;A-H:H"),
+                    new RandomArmorPermutation("R-LM:M"),
+                    new RandomArmorPermutation("R-LM:M;C-H:H"),
+                    new RandomArmorPermutation("R-LM:M;A-H:H"),
+                    new RandomArmorPermutation("R-LMH:L"),
+                    new RandomArmorPermutation("R-LMH:M"),
+                    new RandomArmorPermutation("R-LMH:H"),
+
+                    new RandomArmorPermutation("C-L:L"),
+                    new RandomArmorPermutation("C-L:L;A-M:M"),
+                    new RandomArmorPermutation("C-L:L;A-MH:M"),
+                    new RandomArmorPermutation("C-L:L;A-MH:H"),
+                    new RandomArmorPermutation("C-LM:L"),
+                    new RandomArmorPermutation("C-LM:L;A-H:H"),
+                    new RandomArmorPermutation("C-LM:M"),
+                    new RandomArmorPermutation("C-LM:M;A-H:H"),
+                    new RandomArmorPermutation("C-LMH:L"),
+                    new RandomArmorPermutation("C-LMH:M"),
+                    new RandomArmorPermutation("C-LMH:H"),
+
+                    new RandomArmorPermutation("A-L:L"),
+                    new RandomArmorPermutation("A-LM:L"),
+                    new RandomArmorPermutation("A-LM:M"),
+                    new RandomArmorPermutation("A-LMH:L"),
+                    new RandomArmorPermutation("A-LMH:M"),
+                    new RandomArmorPermutation("A-LMH:H"),
+                };
+
+                foreach (var permutation in permutations)
+                {
+                    yield return new TestCaseData(permutation).SetArgDisplayNames(permutation.Key);
+                }
             }
         }
 
-        public class RandomWeightedCollection
+        public class RandomArmorPermutation
         {
-            public string[] Common { get; set; } = [];
-            public string[] Uncommon { get; set; } = [];
-            public string[] Rare { get; set; } = [];
-            public string Expected { get; set; }
+            public string Key { get; init; }
+            public FeatCollections FeatCollection { get; set; }
+            public RandomWeightedCollection<string> Racial { get; set; }
+            public RandomWeightedCollection<string> Class { get; set; }
+            public RandomWeightedCollection<string> Additional { get; set; }
+            public RandomWeightedCollection<string> Armors { get; set; }
+
+            public static readonly string[] LightArmors = ["light armor", "other light armor"];
+            public static readonly string[] MediumArmors = ["medium armor", "other medium armor"];
+            public static readonly string[] HeavyArmors = ["heavy armor", "other heavy armor"];
+
+            public RandomArmorPermutation(string key)
+            {
+                Key = key;
+                FeatCollection = new();
+                Racial = new() { VeryRare = null };
+                Class = new() { VeryRare = null };
+                Additional = new() { VeryRare = null };
+                Armors = new() { VeryRare = null, Expected = "my random armor" };
+
+                ParseKey();
+            }
+
+            private void ParseKey()
+            {
+                var sections = Key.Split(';');
+                foreach (var section in sections)
+                {
+                    var parts = section.Split(':', '-');
+                    var feats = parts[0];
+                    var proficiencies = parts[1];
+                    var expected = parts[2];
+
+                    switch (feats)
+                    {
+                        case "R":
+                            FeatCollection.Racial = SetProficiencies(proficiencies);
+                            Racial = SetWeights(proficiencies, expected);
+                            break;
+                        case "C":
+                            FeatCollection.Class = SetProficiencies(proficiencies);
+                            Class = SetWeights(proficiencies, expected);
+                            break;
+                        case "A":
+                            FeatCollection.Additional = SetProficiencies(proficiencies);
+                            Additional = SetWeights(proficiencies, expected);
+                            break;
+                    }
+                }
+
+                Armors.Common = GetArmors(Additional.Expected);
+                Armors.Uncommon = GetArmors(Class.Expected);
+                Armors.Rare = GetArmors(Racial.Expected);
+            }
+
+            private string[] GetArmors(string feat)
+            {
+                return feat switch
+                {
+                    FeatConstants.LightArmorProficiency => LightArmors,
+                    FeatConstants.MediumArmorProficiency => MediumArmors,
+                    FeatConstants.HeavyArmorProficiency => HeavyArmors,
+                    _ => [],
+                };
+            }
+
+            private RandomWeightedCollection<string> SetWeights(string proficiencies, string expected)
+            {
+                var feats = proficiencies.Select(GetFeat);
+
+                return new()
+                {
+                    Common = [.. feats.Intersect([FeatConstants.HeavyArmorProficiency])],
+                    Uncommon = [.. feats.Intersect([FeatConstants.MediumArmorProficiency])],
+                    Rare = [.. feats.Intersect([FeatConstants.LightArmorProficiency])],
+                    VeryRare = null,
+                    Expected = GetFeat(expected[0])
+                };
+            }
+
+            private IEnumerable<Feat> SetProficiencies(string proficiencies)
+            {
+                var feats = new List<string> { "other feat" };
+                feats.AddRange(proficiencies.Select(GetFeat));
+                feats.Add("another feat");
+
+                return feats.Select(f => new Feat { Name = f });
+            }
+
+            private string GetFeat(char p)
+            {
+                return p switch
+                {
+                    'L' => FeatConstants.LightArmorProficiency,
+                    'M' => FeatConstants.MediumArmorProficiency,
+                    'H' => FeatConstants.HeavyArmorProficiency,
+                    _ => null,
+                };
+            }
         }
 
         [Test]
@@ -354,7 +435,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<double>(t => t <= 1))).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<int>(t => t <= 100))).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -375,7 +456,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "mundane armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "mundane armor"))).Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -394,7 +475,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("metal armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("metal armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("metal armor", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -413,16 +494,11 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "mundane armor"))).Returns("my random armor");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(mundaneArmor));
-        }
-
-        private static IEnumerable<string> ProficientSet(params string[] expected)
-        {
-            return It.Is<IEnumerable<string>>(ss => ss.Intersect(expected).Count() == expected.Length && ss.Count() == expected.Length);
         }
 
         private Armor CreateArmor(string name)
@@ -442,7 +518,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateArmorFrom_GenerateMagicalArmor()
         {
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -461,7 +537,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             proficientArmors.Remove("heavy armor");
 
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "heavy armor", "other heavy armor")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "heavy armor", "other heavy armor")))
                 .Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(heavyArmor);
 
@@ -478,7 +554,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor", "specific metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor", "specific metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -495,7 +571,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true);
             mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor", "specific metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor", "specific metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -514,7 +590,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -531,7 +607,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -558,7 +634,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -591,7 +667,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -625,7 +701,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -640,7 +716,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("metal armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("metal armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal armor", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -661,7 +737,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("specific random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("specific random armor");
             //Can't apply Dragonhide to specific armor
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "specific random armor", race.Size)).Returns(magicalArmor);
 
@@ -684,7 +760,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("specific random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("specific random armor");
             //Can't apply Dragonhide to specific armor
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "specific random armor", race.Size)).Returns(magicalArmor);
 
@@ -709,7 +785,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("metal armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("metal armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal armor", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -732,7 +808,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("metal armor");
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "metal armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal armor", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -747,7 +823,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -768,7 +844,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -790,7 +866,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -814,7 +890,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -837,7 +913,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -859,7 +935,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var mundaneShield = CreateShield("mundane shield");
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("my random shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -881,7 +957,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             proficientShields.Remove("heavy shield");
 
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "heavy shield", "other heavy shield", "mundane shield")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "heavy shield", "other heavy shield", "mundane shield")))
                 .Returns("my random shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(heavyShield);
 
@@ -899,7 +975,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<double>(t => t <= 1))).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<int>(t => t <= 100))).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("my random shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -920,7 +996,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "mundane shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "mundane shield"))).Returns("my random shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -939,7 +1015,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("metal shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "mundane shield"))).Returns("metal shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -959,7 +1035,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "mundane shield")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "mundane shield")))
                 .Returns("my random shield");
             mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(mundaneShield);
 
@@ -970,7 +1046,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [Test]
         public void GenerateShieldFrom_GenerateMagicalShield()
         {
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -989,7 +1065,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             proficientShields.Remove("heavy shield");
 
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "heavy shield", "other heavy shield")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "heavy shield", "other heavy shield")))
                 .Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(heavyShield);
 
@@ -1006,7 +1082,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield", "specific metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield", "specific metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1023,7 +1099,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true);
             mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield", "specific metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield", "specific metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1042,7 +1118,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1059,7 +1135,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1086,7 +1162,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1119,7 +1195,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1153,7 +1229,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1168,7 +1244,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1189,7 +1265,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("specific random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("specific random shield");
             //Can't apply Dragonhide to specific armor
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "specific random shield", race.Size)).Returns(magicalShield);
 
@@ -1212,7 +1288,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("specific random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("specific random shield");
             //Can't apply Dragonhide to specific shield
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "specific random shield", race.Size)).Returns(magicalShield);
 
@@ -1237,7 +1313,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1260,7 +1336,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("metal shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1275,7 +1351,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1296,7 +1372,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1318,7 +1394,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("specific shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("specific shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1342,7 +1418,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1365,7 +1441,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1415,7 +1491,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "npc armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "npc armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate("npc power", "my random armor", race.Size)).Returns(npcArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -1434,7 +1510,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, (9266 + 90210) / 2);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "npc armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "npc armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate("npc power", "my random armor", race.Size)).Returns(npcArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -1471,7 +1547,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "player armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "player armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate("player power", "my random armor", race.Size)).Returns(playerArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -1490,7 +1566,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, 9266 + 90210);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my armor", "other armor", "metal armor", "player armor"))).Returns("my random armor");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my armor", "other armor", "metal armor", "player armor"))).Returns("my random armor");
             mockMagicalArmorGenerator.Setup(g => g.Generate("player power", "my random armor", race.Size)).Returns(playerArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
@@ -1527,7 +1603,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "npc shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "npc shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate("npc power", "my random shield", race.Size)).Returns(npcShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1546,7 +1622,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, (9266 + 90210) / 2);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "npc shield"))).Returns("my random shield");
+            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "npc shield"))).Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate("npc power", "my random shield", race.Size)).Returns(npcShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
@@ -1584,7 +1660,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "player shield")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "player shield")))
                 .Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate("player power", "my random shield", race.Size)).Returns(playerShield);
 
@@ -1605,7 +1681,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, 9266 + 90210);
             mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet("my shield", "other shield", "metal shield", "player shield")))
+                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet("my shield", "other shield", "metal shield", "player shield")))
                 .Returns("my random shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate("player power", "my random shield", race.Size)).Returns(playerShield);
 
