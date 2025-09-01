@@ -132,40 +132,43 @@ namespace DnDGen.CharacterGen.Items
         private IEnumerable<string> GetPreferredArmors(IEnumerable<Feat> feats, string armorType, CharacterClass characterClass, bool isSpecific, bool isDragonhide)
         {
             var proficiencyFeats = GetArmorProficiencyFeats(feats, armorType);
-            if (!proficiencyFeats.Any())
+            var proficiencyFeatNames = proficiencyFeats.Select(f => f.Name);
+            if (!proficiencyFeatNames.Any(HasPossibleArmors))
                 return [];
 
-            var proficiencyFeatNames = proficiencyFeats.Select(f => f.Name);
             var commonArmorFeatNames = new[] { FeatConstants.HeavyArmorProficiency, FeatConstants.TowerShieldProficiency };
             var uncommonArmorFeatNames = new[] { FeatConstants.MediumArmorProficiency, FeatConstants.ShieldProficiency };
             var rareArmorFeatNames = new[] { FeatConstants.LightArmorProficiency };
 
             var preferredFeatName = collectionsSelector.SelectRandomFrom(
-                proficiencyFeatNames.Intersect(commonArmorFeatNames),
-                proficiencyFeatNames.Intersect(uncommonArmorFeatNames),
-                proficiencyFeatNames.Intersect(rareArmorFeatNames));
+                proficiencyFeatNames.Intersect(commonArmorFeatNames).Where(HasPossibleArmors),
+                proficiencyFeatNames.Intersect(uncommonArmorFeatNames).Where(HasPossibleArmors),
+                proficiencyFeatNames.Intersect(rareArmorFeatNames).Where(HasPossibleArmors));
 
-            var preferredArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, preferredFeatName);
+            return GetArmors(preferredFeatName);
 
-            return FilterArmors(preferredArmors, characterClass, isSpecific, isDragonhide);
-        }
+            bool HasPossibleArmors(string featName) => GetArmors(featName).Any();
 
-        private IEnumerable<string> FilterArmors(IEnumerable<string> armors, CharacterClass characterClass, bool isSpecific, bool isDragonhide)
-        {
-            var specificArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Specific);
-            if (isSpecific)
-                armors = armors.Intersect(specificArmors);
-            else
-                armors = armors.Except(specificArmors);
+            IEnumerable<string> GetArmors(string featName)
+            {
+                var armors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, featName);
 
-            if (characterClass.Name != CharacterClassConstants.Druid)
+                var specificArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Specific);
+                if (isSpecific)
+                    armors = armors.Intersect(specificArmors);
+                else
+                    armors = armors.Except(specificArmors);
+
+                if (characterClass.Name != CharacterClassConstants.Druid)
+                    return armors;
+
+                var metalArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Metal);
+                //INFO: Even if the armor should be Dragonhide, specific armors shouldn't have modified special materials
+                if (!isDragonhide || isSpecific)
+                    return armors.Except(metalArmors);
+
                 return armors;
-
-            var metalArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Metal);
-            if (!isDragonhide)
-                return armors.Except(metalArmors);
-
-            return armors;
+            }
         }
     }
 }
