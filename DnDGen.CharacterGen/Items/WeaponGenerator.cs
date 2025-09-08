@@ -1,10 +1,10 @@
 ﻿using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Generators;
 using DnDGen.Infrastructure.Selectors.Collections;
-using DnDGen.Infrastructure.Selectors.Percentiles;
 using DnDGen.TreasureGen.Items;
 using DnDGen.TreasureGen.Items.Magical;
 using DnDGen.TreasureGen.Items.Mundane;
@@ -14,12 +14,15 @@ using System.Linq;
 
 namespace DnDGen.CharacterGen.Items
 {
-    internal class WeaponGenerator(ICollectionSelector collectionsSelector, IPercentileSelector percentileSelector, JustInTimeFactory justInTimeFactory) : IWeaponGenerator
+    internal class WeaponGenerator(
+        ICollectionSelector collectionsSelector,
+        JustInTimeFactory justInTimeFactory,
+        ITreasureLevelSelector treasureLevelSelector) : IWeaponGenerator
     {
         private readonly ICollectionSelector collectionsSelector = collectionsSelector;
-        private readonly IPercentileSelector percentileSelector = percentileSelector;
         private readonly MundaneItemGenerator mundaneWeaponGenerator = justInTimeFactory.Build<MundaneItemGenerator>(ItemTypeConstants.Weapon);
         private readonly MagicalItemGenerator magicalWeaponGenerator = justInTimeFactory.Build<MagicalItemGenerator>(ItemTypeConstants.Weapon);
+        private readonly ITreasureLevelSelector treasureLevelSelector = treasureLevelSelector;
 
         public Weapon GenerateFrom(FeatCollections feats, CharacterClass characterClass, Race race)
         {
@@ -86,9 +89,7 @@ namespace DnDGen.CharacterGen.Items
 
         private Weapon GenerateFrom(string weaponName, CharacterClass characterClass, Race race)
         {
-            var effectiveLevel = (int)Math.Max(1, characterClass.EffectiveLevel);
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            var power = percentileSelector.SelectFrom(Config.Name, tableName);
+            var power = treasureLevelSelector.SelectPowerFrom(characterClass, race);
 
             var weapon = GenerateWeapon(power, weaponName, race);
             return weapon as Weapon;

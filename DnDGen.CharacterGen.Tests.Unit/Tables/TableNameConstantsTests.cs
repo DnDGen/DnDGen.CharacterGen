@@ -84,12 +84,18 @@ namespace DnDGen.CharacterGen.Tests.Unit.Tables
         [TestCase(TableNameConstants.Formattable.Percentile.GOODNESSCharacterClasses, "{0}CharacterClasses")]
         [TestCase(TableNameConstants.Formattable.Percentile.GOODNESSCLASSBaseRaces, "{0}{1}BaseRaces")]
         [TestCase(TableNameConstants.Formattable.Percentile.GOODNESSCLASSMetaraces, "{0}{1}Metaraces")]
-        [TestCase(TableNameConstants.Formattable.Percentile.LevelXPower, "Level{0}Power")]
         [TestCase(TableNameConstants.Formattable.TrueOrFalse.CLASSHasSpecialistFields, "{0}HasSpecialistFields")]
         [TestCase(TableNameConstants.Formattable.TrueOrFalse.CLASSKnowsAdditionalSpells, "{0}KnowsAdditionalSpells")]
         public void TableNameConstant(string constant, string value)
         {
             Assert.That(constant, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void TableNameConstant_LevelXPower()
+        {
+            var tableName = TableNameConstants.Formattable.Percentile.LevelXPower(9266);
+            Assert.That(tableName, Is.EqualTo("Level9266Power"));
         }
 
         [Test]

@@ -1,10 +1,10 @@
 ﻿using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Generators;
 using DnDGen.Infrastructure.Selectors.Collections;
-using DnDGen.Infrastructure.Selectors.Percentiles;
 using DnDGen.RollGen;
 using DnDGen.TreasureGen.Items;
 using DnDGen.TreasureGen.Items.Magical;
@@ -17,15 +17,15 @@ namespace DnDGen.CharacterGen.Items
 {
     internal class ArmorGenerator(
         ICollectionSelector collectionsSelector,
-        IPercentileSelector percentileSelector,
         JustInTimeFactory justInTimeFactory,
-        Dice dice) : IArmorGenerator
+        Dice dice,
+        ITreasureLevelSelector treasureLevelSelector) : IArmorGenerator
     {
         private readonly ICollectionSelector collectionsSelector = collectionsSelector;
-        private readonly IPercentileSelector percentileSelector = percentileSelector;
         private readonly MundaneItemGenerator mundaneArmorGenerator = justInTimeFactory.Build<MundaneItemGenerator>(ItemTypeConstants.Armor);
         private readonly MagicalItemGenerator magicalArmorGenerator = justInTimeFactory.Build<MagicalItemGenerator>(ItemTypeConstants.Armor);
         private readonly Dice dice = dice;
+        private readonly ITreasureLevelSelector treasureLevelSelector = treasureLevelSelector;
 
         public Armor GenerateArmorFrom(FeatCollections feats, CharacterClass characterClass, Race race)
         {
@@ -33,9 +33,7 @@ namespace DnDGen.CharacterGen.Items
             if (!proficiencyFeats.Any())
                 return null;
 
-            var effectiveLevel = GetEffectiveLevel(characterClass);
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            var power = percentileSelector.SelectFrom(Config.Name, tableName);
+            var power = treasureLevelSelector.SelectPowerFrom(characterClass, race);
             var armorName = GetPreferredArmor(feats, ItemTypeConstants.Armor, characterClass, power);
             var item = GenerateArmor(power, armorName, race, characterClass);
 
@@ -58,20 +56,13 @@ namespace DnDGen.CharacterGen.Items
             _ => 101,
         };
 
-        private static int GetEffectiveLevel(CharacterClass characterClass)
-        {
-            return (int)Math.Max(1, characterClass.EffectiveLevel);
-        }
-
         public Armor GenerateShieldFrom(FeatCollections feats, CharacterClass characterClass, Race race)
         {
             var proficiencyFeats = GetArmorProficiencyFeats(feats.All, AttributeConstants.Shield);
             if (!proficiencyFeats.Any())
                 return null;
 
-            var effectiveLevel = GetEffectiveLevel(characterClass);
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            var power = percentileSelector.SelectFrom(Config.Name, tableName);
+            var power = treasureLevelSelector.SelectPowerFrom(characterClass, race);
             var shieldName = GetPreferredArmor(feats, AttributeConstants.Shield, characterClass, power);
             var item = GenerateArmor(power, shieldName, race, characterClass);
 

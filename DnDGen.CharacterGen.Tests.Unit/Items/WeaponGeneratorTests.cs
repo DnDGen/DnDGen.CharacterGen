@@ -1,11 +1,11 @@
 ﻿using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Items;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Generators;
 using DnDGen.Infrastructure.Selectors.Collections;
-using DnDGen.Infrastructure.Selectors.Percentiles;
 using DnDGen.TreasureGen.Items;
 using DnDGen.TreasureGen.Items.Magical;
 using DnDGen.TreasureGen.Items.Mundane;
@@ -20,7 +20,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
     public class WeaponGeneratorTests
     {
         private IWeaponGenerator weaponGenerator;
-        private Mock<IPercentileSelector> mockPercentileSelector;
+        private Mock<ITreasureLevelSelector> mockTreasureLevelSelector;
         private Mock<MundaneItemGenerator> mockMundaneWeaponGenerator;
         private Mock<MagicalItemGenerator> mockMagicalWeaponGenerator;
         private Mock<ICollectionSelector> mockCollectionsSelector;
@@ -39,13 +39,12 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         private List<string> allTwoHandedWeapons;
         private List<string> allProficientWeapons;
         private Race race;
-        private string powerTableName;
         private string power;
 
         [SetUp]
         public void Setup()
         {
-            mockPercentileSelector = new Mock<IPercentileSelector>();
+            mockTreasureLevelSelector = new Mock<ITreasureLevelSelector>();
             mockMundaneWeaponGenerator = new Mock<MundaneItemGenerator>();
             mockMagicalWeaponGenerator = new Mock<MagicalItemGenerator>();
             mockCollectionsSelector = new Mock<ICollectionSelector>();
@@ -54,7 +53,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockJustInTimeFactory.Setup(f => f.Build<MundaneItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMundaneWeaponGenerator.Object);
             mockJustInTimeFactory.Setup(f => f.Build<MagicalItemGenerator>(ItemTypeConstants.Weapon)).Returns(mockMagicalWeaponGenerator.Object);
 
-            weaponGenerator = new WeaponGenerator(mockCollectionsSelector.Object, mockPercentileSelector.Object, mockJustInTimeFactory.Object);
+            weaponGenerator = new WeaponGenerator(mockCollectionsSelector.Object, mockJustInTimeFactory.Object, mockTreasureLevelSelector.Object);
 
             magicalWeapon = new Weapon();
             additionalFeats = [];
@@ -99,9 +98,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             allProficientWeapons.Add("other two-handed");
             allProficientWeapons.Add("other ammo");
 
-            powerTableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, 9266);
             power = "power";
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(power);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
 
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.ToArray())))
@@ -144,7 +142,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
             allProficientWeapons.Remove(magicalWeapon.Name);
 
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray())))
                 .Returns("my random weapon");
@@ -214,7 +212,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
@@ -232,7 +230,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             var wrongSpecialties = new[] { wrongMundaneWeapon.Name };
@@ -252,7 +250,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             var wrongSpecialties = new[] { wrongMundaneWeapon.Name };
@@ -272,7 +270,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var otherMundaneWeapon = CreateOneHandedMeleeWeapon("other mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             var wrongSpecialties = new[] { wrongMundaneWeapon.Name };
@@ -294,7 +292,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(specialties))).Returns("my random weapon");
@@ -313,7 +311,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var otherMundaneWeapon = CreateOneHandedMeleeWeapon("other mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
             var multipleSpecialties = new[] { mundaneWeapon.Name, otherMundaneWeapon.Name };
@@ -334,7 +332,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         {
             var mundaneWeapon = CreateOneHandedMeleeWeapon("mundane weapon");
             var wrongMundaneWeapon = CreateOneHandedMeleeWeapon("wrong weapon");
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, powerTableName)).Returns(PowerConstants.Mundane);
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
             mockCollectionsSelector
                 .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray())))
                 .Returns("my random weapon");
@@ -759,584 +757,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
             Assert.That(weapon, Is.Null);
             mockMagicalWeaponGenerator.Verify(g => g.Generate(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string[]>()), Times.Never);
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 1)]
-        [TestCase(3, 1)]
-        [TestCase(4, 2)]
-        [TestCase(5, 2)]
-        [TestCase(6, 3)]
-        [TestCase(7, 3)]
-        [TestCase(8, 4)]
-        [TestCase(9, 4)]
-        [TestCase(10, 5)]
-        [TestCase(11, 5)]
-        [TestCase(12, 6)]
-        [TestCase(13, 6)]
-        [TestCase(14, 7)]
-        [TestCase(15, 7)]
-        [TestCase(16, 8)]
-        [TestCase(17, 8)]
-        [TestCase(18, 9)]
-        [TestCase(19, 9)]
-        [TestCase(20, 10)]
-        public void GenerateFrom_NPCIsHalfLevel(int npcLevel, int effectiveLevel)
-        {
-            characterClass.Level = npcLevel;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [Test]
-        public void GenerateFrom_LevelAdjustmentAffectsNPCLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 2)]
-        [TestCase(3, 3)]
-        [TestCase(4, 4)]
-        [TestCase(5, 5)]
-        [TestCase(6, 6)]
-        [TestCase(7, 7)]
-        [TestCase(8, 8)]
-        [TestCase(9, 9)]
-        [TestCase(10, 10)]
-        [TestCase(11, 11)]
-        [TestCase(12, 12)]
-        [TestCase(13, 13)]
-        [TestCase(14, 14)]
-        [TestCase(15, 15)]
-        [TestCase(16, 16)]
-        [TestCase(17, 17)]
-        [TestCase(18, 18)]
-        [TestCase(19, 19)]
-        [TestCase(20, 20)]
-        public void GenerateFrom_PlayerCharacterIsFullLevel(int level, int effectiveLevel)
-        {
-            characterClass.Level = level;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [Test]
-        public void GenerateFrom_LevelAdjustmentAffectsPlayerLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Except(allAmmunitions).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 1)]
-        [TestCase(3, 1)]
-        [TestCase(4, 2)]
-        [TestCase(5, 2)]
-        [TestCase(6, 3)]
-        [TestCase(7, 3)]
-        [TestCase(8, 4)]
-        [TestCase(9, 4)]
-        [TestCase(10, 5)]
-        [TestCase(11, 5)]
-        [TestCase(12, 6)]
-        [TestCase(13, 6)]
-        [TestCase(14, 7)]
-        [TestCase(15, 7)]
-        [TestCase(16, 8)]
-        [TestCase(17, 8)]
-        [TestCase(18, 9)]
-        [TestCase(19, 9)]
-        [TestCase(20, 10)]
-        public void GenerateAmmunition_NPCIsHalfLevel(int npcLevel, int effectiveLevel)
-        {
-            characterClass.Level = npcLevel;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateAmmunition("my ammo");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my ammo"))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateAmmunition(characterClass, race, "my ammo");
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [Test]
-        public void GenerateAmmunition_LevelAdjustmentAffectsNPCLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateAmmunition("my ammo");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my ammo"))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateAmmunition(characterClass, race, "my ammo");
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 2)]
-        [TestCase(3, 3)]
-        [TestCase(4, 4)]
-        [TestCase(5, 5)]
-        [TestCase(6, 6)]
-        [TestCase(7, 7)]
-        [TestCase(8, 8)]
-        [TestCase(9, 9)]
-        [TestCase(10, 10)]
-        [TestCase(11, 11)]
-        [TestCase(12, 12)]
-        [TestCase(13, 13)]
-        [TestCase(14, 14)]
-        [TestCase(15, 15)]
-        [TestCase(16, 16)]
-        [TestCase(17, 17)]
-        [TestCase(18, 18)]
-        [TestCase(19, 19)]
-        [TestCase(20, 20)]
-        public void GenerateAmmunition_PlayerCharacterIsFullLevel(int level, int effectiveLevel)
-        {
-            characterClass.Level = level;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateAmmunition("my ammo");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my ammo"))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateAmmunition(characterClass, race, "my ammo");
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [Test]
-        public void GenerateAmmunition_LevelAdjustmentAffectsPlayerLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateAmmunition("my ammo");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet("my ammo"))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateAmmunition(characterClass, race, "my ammo");
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 1)]
-        [TestCase(3, 1)]
-        [TestCase(4, 2)]
-        [TestCase(5, 2)]
-        [TestCase(6, 3)]
-        [TestCase(7, 3)]
-        [TestCase(8, 4)]
-        [TestCase(9, 4)]
-        [TestCase(10, 5)]
-        [TestCase(11, 5)]
-        [TestCase(12, 6)]
-        [TestCase(13, 6)]
-        [TestCase(14, 7)]
-        [TestCase(15, 7)]
-        [TestCase(16, 8)]
-        [TestCase(17, 8)]
-        [TestCase(18, 9)]
-        [TestCase(19, 9)]
-        [TestCase(20, 10)]
-        public void GenerateMeleeFrom_NPCIsHalfLevel(int npcLevel, int effectiveLevel)
-        {
-            characterClass.Level = npcLevel;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [Test]
-        public void GenerateMeleeFrom_LevelAdjustmentAffectsNPCLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 2)]
-        [TestCase(3, 3)]
-        [TestCase(4, 4)]
-        [TestCase(5, 5)]
-        [TestCase(6, 6)]
-        [TestCase(7, 7)]
-        [TestCase(8, 8)]
-        [TestCase(9, 9)]
-        [TestCase(10, 10)]
-        [TestCase(11, 11)]
-        [TestCase(12, 12)]
-        [TestCase(13, 13)]
-        [TestCase(14, 14)]
-        [TestCase(15, 15)]
-        [TestCase(16, 16)]
-        [TestCase(17, 17)]
-        [TestCase(18, 18)]
-        [TestCase(19, 19)]
-        [TestCase(20, 20)]
-        public void GenerateMeleeFrom_PlayerCharacterIsFullLevel(int level, int effectiveLevel)
-        {
-            characterClass.Level = level;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [Test]
-        public void GenerateMeleeFrom_LevelAdjustmentAffectsPlayerLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).ToArray()))).Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 1)]
-        [TestCase(3, 1)]
-        [TestCase(4, 2)]
-        [TestCase(5, 2)]
-        [TestCase(6, 3)]
-        [TestCase(7, 3)]
-        [TestCase(8, 4)]
-        [TestCase(9, 4)]
-        [TestCase(10, 5)]
-        [TestCase(11, 5)]
-        [TestCase(12, 6)]
-        [TestCase(13, 6)]
-        [TestCase(14, 7)]
-        [TestCase(15, 7)]
-        [TestCase(16, 8)]
-        [TestCase(17, 8)]
-        [TestCase(18, 9)]
-        [TestCase(19, 9)]
-        [TestCase(20, 10)]
-        public void GenerateRangedFrom_NPCIsHalfLevel(int npcLevel, int effectiveLevel)
-        {
-            characterClass.Level = npcLevel;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateRangedWeapon("ranged weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allRangedWeapons).Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [Test]
-        public void GenerateRangedFrom_LevelAdjustmentAffectsNPCLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var playerWeapon = CreateRangedWeapon("ranged weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allRangedWeapons).Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 2)]
-        [TestCase(3, 3)]
-        [TestCase(4, 4)]
-        [TestCase(5, 5)]
-        [TestCase(6, 6)]
-        [TestCase(7, 7)]
-        [TestCase(8, 8)]
-        [TestCase(9, 9)]
-        [TestCase(10, 10)]
-        [TestCase(11, 11)]
-        [TestCase(12, 12)]
-        [TestCase(13, 13)]
-        [TestCase(14, 14)]
-        [TestCase(15, 15)]
-        [TestCase(16, 16)]
-        [TestCase(17, 17)]
-        [TestCase(18, 18)]
-        [TestCase(19, 19)]
-        [TestCase(20, 20)]
-        public void GenerateRangedFrom_PlayerCharacterIsFullLevel(int level, int effectiveLevel)
-        {
-            characterClass.Level = level;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateRangedWeapon("ranged weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allRangedWeapons).Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [Test]
-        public void GenerateRangedFrom_LevelAdjustmentAffectsPlayerLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateRangedWeapon("ranged weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allRangedWeapons).Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateRangedFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 1)]
-        [TestCase(3, 1)]
-        [TestCase(4, 2)]
-        [TestCase(5, 2)]
-        [TestCase(6, 3)]
-        [TestCase(7, 3)]
-        [TestCase(8, 4)]
-        [TestCase(9, 4)]
-        [TestCase(10, 5)]
-        [TestCase(11, 5)]
-        [TestCase(12, 6)]
-        [TestCase(13, 6)]
-        [TestCase(14, 7)]
-        [TestCase(15, 7)]
-        [TestCase(16, 8)]
-        [TestCase(17, 8)]
-        [TestCase(18, 9)]
-        [TestCase(19, 9)]
-        [TestCase(20, 10)]
-        public void GenerateOneHandedMeleeFrom_NPCIsHalfLevel(int npcLevel, int effectiveLevel)
-        {
-            characterClass.Level = npcLevel;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var npcWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).Except(allTwoHandedWeapons).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(npcWeapon);
-
-            var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(npcWeapon));
-        }
-
-        [Test]
-        public void GenerateOneHandedMeleeFrom_LevelAdjustmentAffectsNPCLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = true;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("npc power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).Except(allTwoHandedWeapons).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("npc power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [TestCase(1, 1)]
-        [TestCase(2, 2)]
-        [TestCase(3, 3)]
-        [TestCase(4, 4)]
-        [TestCase(5, 5)]
-        [TestCase(6, 6)]
-        [TestCase(7, 7)]
-        [TestCase(8, 8)]
-        [TestCase(9, 9)]
-        [TestCase(10, 10)]
-        [TestCase(11, 11)]
-        [TestCase(12, 12)]
-        [TestCase(13, 13)]
-        [TestCase(14, 14)]
-        [TestCase(15, 15)]
-        [TestCase(16, 16)]
-        [TestCase(17, 17)]
-        [TestCase(18, 18)]
-        [TestCase(19, 19)]
-        [TestCase(20, 20)]
-        public void GenerateOneHandedMeleeFrom_PlayerCharacterIsFullLevel(int level, int effectiveLevel)
-        {
-            characterClass.Level = level;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, effectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).Except(allTwoHandedWeapons).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
-        }
-
-        [Test]
-        public void GenerateOneHandedMeleeFrom_LevelAdjustmentAffectsPlayerLevelForWeapon()
-        {
-            characterClass.Level = 9266;
-            characterClass.LevelAdjustment = 90210;
-            characterClass.Name = "class name";
-            characterClass.IsNPC = false;
-
-            var playerWeapon = CreateOneHandedMeleeWeapon("melee weapon");
-
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, characterClass.EffectiveLevel);
-            mockPercentileSelector.Setup(s => s.SelectFrom(Config.Name, tableName)).Returns("player power");
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(ProficientSet(allProficientWeapons.Intersect(allMeleeWeapons).Except(allTwoHandedWeapons).ToArray())))
-                .Returns("my random weapon");
-            mockMagicalWeaponGenerator.Setup(g => g.Generate("player power", "my random weapon", race.Size)).Returns(playerWeapon);
-
-            var weapon = weaponGenerator.GenerateOneHandedMeleeFrom(feats, characterClass, race);
-            Assert.That(weapon, Is.EqualTo(playerWeapon));
         }
     }
 }

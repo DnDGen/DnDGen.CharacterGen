@@ -1,6 +1,7 @@
 ﻿using DnDGen.CharacterGen.CharacterClasses;
 using DnDGen.CharacterGen.Feats;
 using DnDGen.CharacterGen.Items;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Tables;
 using DnDGen.Infrastructure.Selectors.Collections;
@@ -22,6 +23,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         private Mock<ICollectionSelector> mockCollectionsSelector;
         private Mock<IArmorGenerator> mockArmorGenerator;
         private Mock<ITreasureGenerator> mockTreasureGenerator;
+        private Mock<ITreasureLevelSelector> mockTreasureLevelSelector;
         private FeatCollections feats;
         private List<Feat> additionalFeats;
         private CharacterClass characterClass;
@@ -41,7 +43,13 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockCollectionsSelector = new Mock<ICollectionSelector>();
             mockArmorGenerator = new Mock<IArmorGenerator>();
             mockTreasureGenerator = new Mock<ITreasureGenerator>();
-            equipmentGenerator = new EquipmentGenerator(mockCollectionsSelector.Object, mockWeaponGenerator.Object, mockTreasureGenerator.Object, mockArmorGenerator.Object);
+            mockTreasureLevelSelector = new Mock<ITreasureLevelSelector>();
+            equipmentGenerator = new EquipmentGenerator(
+                mockCollectionsSelector.Object,
+                mockWeaponGenerator.Object,
+                mockTreasureGenerator.Object,
+                mockArmorGenerator.Object,
+                mockTreasureLevelSelector.Object);
             additionalFeats = [];
             feats = new FeatCollections { Additional = additionalFeats };
             characterClass = new CharacterClass();

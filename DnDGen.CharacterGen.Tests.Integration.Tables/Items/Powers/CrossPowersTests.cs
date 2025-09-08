@@ -13,7 +13,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items.Powers
         {
             get
             {
-                return string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, 1);
+                return TableNameConstants.Formattable.Percentile.LevelXPower(1);
             }
         }
 
@@ -40,7 +40,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items.Powers
 
         private void AssertTable(int level)
         {
-            var tableName = string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, level);
+            var tableName = TableNameConstants.Formattable.Percentile.LevelXPower(level);
             var table = percentileMapper.Map(Config.Name, tableName);
 
             Assert.That(table, Is.Not.Null);

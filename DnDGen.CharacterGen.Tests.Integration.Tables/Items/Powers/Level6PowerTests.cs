@@ -9,7 +9,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items.Powers
     {
         protected override string tableName
         {
-            get { return string.Format(TableNameConstants.Formattable.Percentile.LevelXPower, 6); }
+            get { return TableNameConstants.Formattable.Percentile.LevelXPower(6); }
         }
 
         [TestCase(1, 59, PowerConstants.Mundane)]
