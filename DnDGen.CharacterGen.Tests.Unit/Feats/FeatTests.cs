@@ -31,7 +31,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
         public void CloneFeat()
         {
             feat.CanBeTakenMultipleTimes = Convert.ToBoolean(random.Next(2));
-            feat.Foci = new[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+            feat.Foci = [Guid.NewGuid().ToString(), Guid.NewGuid().ToString()];
             feat.Frequency.Quantity = random.Next();
             feat.Frequency.TimePeriod = Guid.NewGuid().ToString();
             feat.Name = Guid.NewGuid().ToString();
@@ -47,6 +47,42 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             Assert.That(clone.Frequency.TimePeriod, Is.EqualTo(feat.Frequency.TimePeriod));
             Assert.That(clone.Name, Is.EqualTo(feat.Name));
             Assert.That(clone.Power, Is.EqualTo(feat.Power));
+        }
+
+        [Test]
+        public void Summary_ReturnsName()
+        {
+            Assert.Fail("not yet written");
+        }
+
+        [Test]
+        public void Summary_ReturnsNameWithFocus()
+        {
+            Assert.Fail("not yet written");
+        }
+
+        [Test]
+        public void Summary_ReturnsNameWithFoci()
+        {
+            Assert.Fail("not yet written");
+        }
+
+        [Test]
+        public void ToString_ReturnsName()
+        {
+            Assert.Fail("not yet written");
+        }
+
+        [Test]
+        public void ToString_ReturnsNameWithFocus()
+        {
+            Assert.Fail("not yet written");
+        }
+
+        [Test]
+        public void ToString_ReturnsNameWithFoci()
+        {
+            Assert.Fail("not yet written");
         }
     }
 }

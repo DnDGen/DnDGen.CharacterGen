@@ -34,10 +34,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
 
             characterClass = new CharacterClass();
             race = new Race();
-            stats = new Dictionary<string, Ability>();
-            skills = new List<Skill>();
+            stats = [];
+            skills = [];
             baseAttack = new BaseAttack();
-            racialFeats = new List<Feat>();
+            racialFeats = [];
 
             mockRacialFeatsGenerator.Setup(g => g.GenerateWith(race, skills, stats)).Returns(racialFeats);
         }
@@ -48,7 +48,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             racialFeats.Add(new Feat());
             racialFeats.Add(new Feat());
 
-            racialFeats[0].Foci = new[] { "focus" };
+            racialFeats[0].Foci = ["focus"];
             racialFeats[0].Name = "racialFeat1";
             racialFeats[0].Power = 9266;
             racialFeats[1].Frequency.Quantity = 42;
@@ -62,11 +62,13 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
         [Test]
         public void GetClassFeats()
         {
-            var classFeats = new List<Feat>();
-            classFeats.Add(new Feat());
-            classFeats.Add(new Feat());
+            var classFeats = new List<Feat>
+            {
+                new(),
+                new()
+            };
 
-            classFeats[0].Foci = new[] { "focus" };
+            classFeats[0].Foci = ["focus"];
             classFeats[0].Name = "classFeat1";
             classFeats[0].Power = 9266;
             classFeats[1].Frequency.Quantity = 42;
@@ -82,11 +84,13 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
         [Test]
         public void GetAdditionalFeats()
         {
-            var additionalFeats = new List<Feat>();
-            additionalFeats.Add(new Feat());
-            additionalFeats.Add(new Feat());
+            var additionalFeats = new List<Feat>
+            {
+                new(),
+                new()
+            };
 
-            additionalFeats[0].Foci = new[] { "focus" };
+            additionalFeats[0].Foci = ["focus"];
             additionalFeats[0].Name = "feat1";
             additionalFeats[0].Power = 9266;
             additionalFeats[1].Frequency.Quantity = 42;
@@ -97,6 +101,15 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
             Assert.That(feats.Additional, Is.EqualTo(additionalFeats));
+        }
+
+        [Test]
+        public void ConsolidateFeatsWithFoci()
+        {
+            // If powers differ, do not combine (Skill Bonus)
+            // Do not combine across Racial/Class/Additional
+            // If frequency differs, do not combine (spell-like abilities)
+            Assert.Fail("not yet written");
         }
     }
 }

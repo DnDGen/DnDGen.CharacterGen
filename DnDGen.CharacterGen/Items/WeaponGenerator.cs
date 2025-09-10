@@ -167,9 +167,9 @@ namespace DnDGen.CharacterGen.Items
 
             return collectionsSelector.SelectRandomFrom(
                 nonProficiencyFeats,
-                proficiencyFeats.Where(f => f.Name == FeatConstants.ExoticWeaponProficiency),
                 proficiencyFeats.Where(f => f.Name == FeatConstants.MartialWeaponProficiency),
-                proficiencyFeats.Where(f => f.Name == FeatConstants.SimpleWeaponProficiency));
+                proficiencyFeats.Where(f => f.Name == FeatConstants.SimpleWeaponProficiency),
+                proficiencyFeats.Where(f => f.Name == FeatConstants.ExoticWeaponProficiency));
         }
     }
 }
