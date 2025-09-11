@@ -149,12 +149,20 @@ namespace DnDGen.CharacterGen.Items
             return preferredWeapons.Intersect(filteredWeapons);
         }
 
-        private IEnumerable<string> GetPossibleWeapons(Feat feat)
+        private IEnumerable<string> GetPossibleWeapons(Feat feat, IEnumerable<Feat> allFeats)
         {
             var possibleWeapons = feat.Foci;
 
             if (feat.Foci.Contains(FeatConstants.Foci.All))
+            {
                 possibleWeapons = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatFoci, feat.Name);
+
+                if (feat.Name == FeatConstants.MartialWeaponProficiency)
+                {
+                    var weaponFamiliarities = allFeats.Where(f => f.Name == FeatConstants.WeaponFamiliarity).SelectMany(f => f.Foci);
+                    possibleWeapons = possibleWeapons.Concat(weaponFamiliarities);
+                }
+            }
 
             var allWeapons = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, ItemTypeConstants.Weapon);
             return possibleWeapons.Intersect(allWeapons);
