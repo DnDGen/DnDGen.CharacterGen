@@ -11,6 +11,8 @@ using DnDGen.TreasureGen.Items.Magical;
 using DnDGen.TreasureGen.Items.Mundane;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -61,7 +63,12 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             racialFeats = [];
             feats = new FeatCollections { Additional = additionalFeats, Class = classFeats, Racial = racialFeats };
             characterClass = new CharacterClass();
-            proficiencyFeats = [];
+            proficiencyFeats =
+            [
+                FeatConstants.SimpleWeaponProficiency,
+                FeatConstants.MartialWeaponProficiency,
+                FeatConstants.ExoticWeaponProficiency,
+            ];
             allWeapons = [];
             allAmmunitions = [];
             allMeleeWeapons = [];
@@ -77,8 +84,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             magicalWeapon.IsMagical = true;
             characterClass.Name = "class name";
             characterClass.Level = 9266;
-            additionalFeats.Add(new Feat { Name = "all proficiency", Foci = [FeatConstants.Foci.All] });
-            proficiencyFeats.Add(additionalFeats[0].Name);
+            additionalFeats.Add(new Feat { Name = FeatConstants.SimpleWeaponProficiency, Foci = [FeatConstants.Foci.All] });
 
             allWeapons.Add("other weapon");
             allWeapons.Add("other melee");
@@ -101,9 +107,39 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             power = "power";
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
 
+            var index = 0;
+
             mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet(allProficientWeapons.ToArray())))
-                .Returns("my random weapon");
+                .Setup(s => s.SelectRandomFrom(It.IsAny<IEnumerable<string>>()))
+                .Returns((IEnumerable<string> ss) => ss.ElementAt(index++ % ss.Count()));
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>(),
+                    It.IsAny<IEnumerable<string>>()))
+                .Returns(GetWeightedRandom<string>);
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    It.IsAny<IEnumerable<Feat>>(),
+                    It.IsAny<IEnumerable<Feat>>(),
+                    It.IsAny<IEnumerable<Feat>>(),
+                    It.IsAny<IEnumerable<Feat>>()))
+                .Returns(GetWeightedRandom<Feat>);
+
+            T GetWeightedRandom<T>(IEnumerable<T> common, IEnumerable<T> uncommon, IEnumerable<T> rare, IEnumerable<T> veryRare)
+            {
+                common ??= [];
+                uncommon ??= [];
+                rare ??= [];
+                veryRare ??= [];
+
+                var all = common.Concat(uncommon).Concat(rare).Concat(veryRare);
+                var total = all.Count();
+
+                return all.ElementAt(index++ % total);
+            }
+
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, ItemTypeConstants.Weapon + GroupConstants.Proficiency))
@@ -128,15 +164,27 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                 .Returns(allTwoHandedWeapons);
         }
 
+        private void SetupSelectRandomWeapon(string[] weapons, string expected)
+        {
+            mockCollectionsSelector
+                .Setup(s => s.SelectRandomFrom(
+                    RandomWeightedCollection<string>.EquivalentSet(weapons),
+                    RandomWeightedCollection<string>.EquivalentSet(),
+                    RandomWeightedCollection<string>.EquivalentSet(),
+                    null))
+                .Returns(expected);
+        }
+
         [Test]
         public void GenerateFrom_GenerateNoWeapon()
         {
+            additionalFeats.Clear();
             additionalFeats.Add(new Feat { Name = "feat 1" });
             additionalFeats.Add(new Feat { Name = "feat 2", Foci = [FeatConstants.Foci.UnarmedStrike] });
 
             proficiencyFeats.Clear();
+            proficiencyFeats.Add(additionalFeats[0].Name);
             proficiencyFeats.Add(additionalFeats[1].Name);
-            proficiencyFeats.Add(additionalFeats[2].Name);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
             Assert.That(weapon, Is.Null);
@@ -150,9 +198,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             allProficientWeapons.Remove(magicalWeapon.Name);
 
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet(allProficientWeapons.Except(allAmmunitions).ToArray())))
-                .Returns("my random weapon");
+            SetupSelectRandomWeapon([.. allProficientWeapons.Except(allAmmunitions)], "my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
             var weapon = weaponGenerator.GenerateFrom(feats, characterClass, race);
@@ -216,6 +262,216 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             return weapon;
         }
 
+        [TestCaseSource(nameof(RandomWeaponData))]
+        public void GenerateFrom_GenerateMundaneWeapon_FromRandom(RandomWeaponPermutation permutation)
+        {
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
+
+            allWeapons.AddRange(RandomWeaponPermutation.AllWeapons);
+
+            var expectedWeapon = CreateWeapon(permutation.Weapons.Expected);
+
+            permutation.Racial.SetupMock(mockCollectionsSelector);
+            permutation.Class.SetupMock(mockCollectionsSelector);
+            permutation.Additional.SetupMock(mockCollectionsSelector);
+            permutation.Weapons.SetupMock(mockCollectionsSelector);
+
+            mockMundaneWeaponGenerator.Setup(g => g.Generate(permutation.Weapons.Expected, race.Size)).Returns(expectedWeapon);
+
+            var weapon = weaponGenerator.GenerateFrom(permutation.FeatCollection, characterClass, race);
+
+            permutation.Racial.VerifyMock(mockCollectionsSelector);
+            permutation.Class.VerifyMock(mockCollectionsSelector);
+            permutation.Additional.VerifyMock(mockCollectionsSelector);
+            permutation.Weapons.VerifyMock(mockCollectionsSelector);
+
+            mockMundaneWeaponGenerator.Verify(g => g.Generate(permutation.Weapons.Expected, race.Size), Times.Once);
+
+            Assert.That(weapon, Is.EqualTo(expectedWeapon));
+        }
+
+        private static IEnumerable RandomWeaponData
+        {
+            get
+            {
+                var sources = new[] { "R", "C", "A" };
+                var featPerms = new[]
+                {
+                    "S:S",
+                    "SM:S",
+                    "SM:M",
+                    "SE:S",
+                    "SE:E",
+                    "SN:S",
+                    "SN:N",
+                    "SME:S",
+                    "SME:M",
+                    "SME:E",
+                    "SMN:S",
+                    "SMN:M",
+                    "SMN:N",
+                    "SEN:S",
+                    "SEN:E",
+                    "SEN:N",
+                    "SMEN:S",
+                    "SMEN:M",
+                    "SMEN:E",
+                    "SMEN:N",
+
+                    "M:M",
+                    "ME:M",
+                    "ME:E",
+                    "MN:M",
+                    "MN:N",
+                    "MEN:M",
+                    "MEN:E",
+                    "MEN:N",
+
+                    "E:E",
+                    "EN:E",
+                    "EN:N",
+
+                    "N:N",
+                };
+
+                foreach (var featPerm in featPerms)
+                {
+                    foreach (var source in sources)
+                    {
+                        var key = $"{source}-{featPerm}";
+                        yield return new TestCaseData(new RandomWeaponPermutation(key)).SetArgDisplayNames(key);
+
+                        var otherSource1 = sources.Except([source]).First();
+                        var otherSource2 = sources.Except([source]).Last();
+                        foreach (var featPerm2 in featPerms)
+                        {
+                            var key2 = $"{otherSource1}-{featPerm};{otherSource2}-{featPerm2}";
+                            yield return new TestCaseData(new RandomWeaponPermutation(key2)).SetArgDisplayNames(key2);
+                        }
+                    }
+
+                    foreach (var featPerm2 in featPerms)
+                    {
+                        foreach (var featPerm3 in featPerms)
+                        {
+                            var key3 = $"{sources[0]}-{featPerm};{sources[1]}-{featPerm2};{sources[2]}-{featPerm3}";
+                            yield return new TestCaseData(new RandomWeaponPermutation(key3)).SetArgDisplayNames(key3);
+                        }
+                    }
+                }
+            }
+        }
+
+        public class RandomWeaponPermutation
+        {
+            public string Key { get; init; }
+            public FeatCollections FeatCollection { get; set; }
+            public RandomWeightedCollection<Feat> Racial { get; set; }
+            public RandomWeightedCollection<Feat> Class { get; set; }
+            public RandomWeightedCollection<Feat> Additional { get; set; }
+            public RandomWeightedCollection<string> Weapons { get; set; }
+
+            private static readonly string[] BaseWeapons = [
+                "Racial weapon", "other Racial weapon",
+                "Class weapon", "other Class weapon",
+                "Additional weapon", "other Additional weapon",
+            ];
+            public static readonly string[] SpecialistWeapons = [.. BaseWeapons.Select(w => $"Specialist {w}")];
+            public static readonly string[] SimpleWeapons = [.. BaseWeapons.Select(w => $"Simple {w}")];
+            public static readonly string[] MartialWeapons = [.. BaseWeapons.Select(w => $"Martial {w}")];
+            public static readonly string[] ExoticWeapons = [.. BaseWeapons.Select(w => $"Exotic {w}")];
+            public static readonly string[] AllWeapons = [.. SpecialistWeapons, .. SimpleWeapons, .. MartialWeapons, .. ExoticWeapons];
+
+            private const string SpecialistFeatName = "Non-Proficiency Weapon Feat";
+
+            public RandomWeaponPermutation(string key)
+            {
+                Key = key;
+                FeatCollection = new();
+                Racial = new();
+                Class = new();
+                Additional = new();
+                Weapons = new() { VeryRare = null, Expected = "my random weapon" };
+
+                ParseKey();
+            }
+
+            public override string ToString() => Key;
+
+            private void ParseKey()
+            {
+                var sections = Key.Split(';');
+                foreach (var section in sections)
+                {
+                    var parts = section.Split(':', '-');
+                    var feats = parts[0];
+                    var proficiencies = parts[1];
+                    var expected = parts[2];
+
+                    switch (feats)
+                    {
+                        case "R":
+                            FeatCollection.Racial = SetProficiencies(proficiencies, "Racial");
+                            Racial = SetWeights(FeatCollection.Racial, expected);
+                            break;
+                        case "C":
+                            FeatCollection.Class = SetProficiencies(proficiencies, "Class");
+                            Class = SetWeights(FeatCollection.Class, expected);
+                            break;
+                        case "A":
+                            FeatCollection.Additional = SetProficiencies(proficiencies, "Additional");
+                            Additional = SetWeights(FeatCollection.Additional, expected);
+                            break;
+                        default: throw new ArgumentException($"Unknown feat source '{feats}'");
+                    }
+                }
+
+                Weapons.Common = Additional.Expected?.Foci.Intersect(AllWeapons).ToArray() ?? [];
+                Weapons.Uncommon = Class.Expected?.Foci.Intersect(AllWeapons).ToArray() ?? [];
+                Weapons.Rare = Racial.Expected?.Foci.Intersect(AllWeapons).ToArray() ?? [];
+            }
+
+            private RandomWeightedCollection<Feat> SetWeights(IEnumerable<Feat> feats, string expected) => new()
+            {
+                Common = [.. feats.Where(f => f.Name == SpecialistFeatName)],
+                Uncommon = [.. feats.Where(f => f.Name == FeatConstants.MartialWeaponProficiency)],
+                Rare = [.. feats.Where(f => f.Name == FeatConstants.SimpleWeaponProficiency)],
+                VeryRare = [.. feats.Where(f => f.Name == FeatConstants.ExoticWeaponProficiency)],
+                Expected = feats.First(f => f.Name == GetFeatName(expected[0]))
+            };
+
+            private IEnumerable<Feat> SetProficiencies(string proficiencies, string filter)
+            {
+                var feats = new List<Feat> { new() { Name = "other feat" } };
+                feats.AddRange(proficiencies.Select(p => BuildFeat(p, filter)));
+                feats.Add(new() { Name = "another feat" });
+
+                return feats;
+            }
+
+            private static string[] GetFoci(char? p, string filter) => p switch
+            {
+                'S' => GetFilteredWeapons(SimpleWeapons, filter),
+                'M' => GetFilteredWeapons(MartialWeapons, filter),
+                'E' => GetFilteredWeapons(ExoticWeapons, filter),
+                'N' => GetFilteredWeapons(SpecialistWeapons, filter),
+                _ => [],
+            };
+
+            private static string[] GetFilteredWeapons(string[] weapons, string filter) => [.. weapons.Where(w => w.Contains(filter))];
+
+            private static string GetFeatName(char p) => p switch
+            {
+                'S' => FeatConstants.SimpleWeaponProficiency,
+                'M' => FeatConstants.MartialWeaponProficiency,
+                'E' => FeatConstants.ExoticWeaponProficiency,
+                'N' => SpecialistFeatName,
+                _ => throw new ArgumentException($"Unknown feat character '{p}'"),
+            };
+
+            private static Feat BuildFeat(char p, string filter) => new() { Name = GetFeatName(p), Foci = GetFoci(p, filter).Concat(["not a weapon"]) };
+        }
+
         [Test]
         public void GenerateFrom_CanWieldSpecificMundaneWeaponProficiency()
         {
@@ -224,7 +480,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var specialties = new[] { mundaneWeapon.Name };
-            mockCollectionsSelector.Setup(s => s.SelectRandomFrom(RandomWeightedCollection<string>.EquivalentSet(specialties))).Returns("my random weapon");
+            SetupSelectRandomWeapon(specialties, "my random weapon");
             mockMundaneWeaponGenerator.Setup(g => g.Generate("my random weapon", race.Size)).Returns(mundaneWeapon);
 
             additionalFeats.Add(new Feat { Name = "feat2", Foci = specialties });
