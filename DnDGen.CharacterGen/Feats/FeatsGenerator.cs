@@ -23,8 +23,10 @@ namespace DnDGen.CharacterGen.Feats
 
         public FeatCollections GenerateWith(CharacterClass characterClass, Race race, Dictionary<string, Ability> abilities, IEnumerable<Skill> skills, BaseAttack baseAttack)
         {
-            var featCollections = new FeatCollections();
-            featCollections.Racial = racialFeatsGenerator.GenerateWith(race, skills, abilities);
+            var featCollections = new FeatCollections
+            {
+                Racial = racialFeatsGenerator.GenerateWith(race, skills, abilities)
+            };
             featCollections.Class = classFeatsGenerator.GenerateWith(characterClass, race, abilities, featCollections.Racial, skills);
 
             var automaticFeats = featCollections.All.ToArray();

@@ -331,7 +331,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                     "EN:E",
                     "EN:N",
 
-                    "N:N",
+                    // INFO: Not valid to only have non-proficient feats - then you're not proficient in any weapons
+                    //"N:N",
                 };
 
                 foreach (var featPerm in featPerms)
@@ -340,22 +341,25 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                     {
                         var key = $"{source}-{featPerm}";
                         yield return new TestCaseData(new RandomWeaponPermutation(key)).SetArgDisplayNames(key);
-
-                        var otherSource1 = sources.Except([source]).First();
-                        var otherSource2 = sources.Except([source]).Last();
-                        foreach (var featPerm2 in featPerms)
-                        {
-                            var key2 = $"{otherSource1}-{featPerm};{otherSource2}-{featPerm2}";
-                            yield return new TestCaseData(new RandomWeaponPermutation(key2)).SetArgDisplayNames(key2);
-                        }
                     }
+                }
 
-                    foreach (var featPerm2 in featPerms)
+                var allFeatPerms = new[]
+                {
+                    "SMEN:S",
+                    "SMEN:M",
+                    "SMEN:E",
+                    "SMEN:N",
+                };
+
+                foreach (var r in allFeatPerms)
+                {
+                    foreach (var c in allFeatPerms)
                     {
-                        foreach (var featPerm3 in featPerms)
+                        foreach (var a in allFeatPerms)
                         {
-                            var key3 = $"{sources[0]}-{featPerm};{sources[1]}-{featPerm2};{sources[2]}-{featPerm3}";
-                            yield return new TestCaseData(new RandomWeaponPermutation(key3)).SetArgDisplayNames(key3);
+                            var key = $"R-{r};C-{c};A-{a}";
+                            yield return new TestCaseData(new RandomWeaponPermutation(key)).SetArgDisplayNames(key);
                         }
                     }
                 }
