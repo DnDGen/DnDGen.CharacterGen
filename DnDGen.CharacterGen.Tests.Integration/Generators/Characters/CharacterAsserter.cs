@@ -284,10 +284,14 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
 
         private void AssertDistinctFeatsWithfoci(IEnumerable<Feat> feats, string message)
         {
-            var featsWithFoci = feats.Where(f => f.Foci.Any());
-            var featNames = featsWithFoci.Select(f => f.Name);
+            var featsWithFoci = feats
+                .Where(f => f.Foci.Any())
+                .GroupBy(f => f.Name + f.Power + f.Frequency.Quantity + f.Frequency.TimePeriod);
 
-            Assert.That(featNames, Is.Unique, message);
+            foreach (var group in featsWithFoci)
+            {
+                Assert.That(group.Count(), Is.EqualTo(1), $"{message}; Group {group.Key}");
+            }
         }
 
         private void AssertEquipment(Character character)

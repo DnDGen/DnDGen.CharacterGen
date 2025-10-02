@@ -58,7 +58,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             racialFeats[1].Name = "racialFeat2";
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            Assert.That(feats.Racial, Is.EqualTo(racialFeats));
+            Assert.That(feats.Racial, Is.EquivalentTo(racialFeats));
         }
 
         [Test]
@@ -67,21 +67,26 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             racialFeats.Add(new Feat());
             racialFeats.Add(new Feat());
             racialFeats.Add(new Feat());
+            racialFeats.Add(new Feat());
 
             racialFeats[0].Name = "feat with foci";
             racialFeats[0].Foci = ["focus 1", "focus 2"];
             racialFeats[1].Name = "feat with other foci";
             racialFeats[1].Foci = ["focus 3", "focus 4"];
-            racialFeats[2].Name = "feat with foci";
-            racialFeats[2].Foci = ["focus 5", "focus 6"];
+            racialFeats[2].Name = "feat without foci";
+            racialFeats[2].Foci = [];
+            racialFeats[3].Name = "feat with foci";
+            racialFeats[3].Foci = ["focus 5", "focus 6"];
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
             var actualFeats = feats.Racial.ToArray();
-            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
-            Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
-            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
-            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
-            Assert.That(actualFeats, Has.Length.EqualTo(2));
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat without foci"));
+            Assert.That(actualFeats[0].Foci, Is.Empty);
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
+            Assert.That(actualFeats[2].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[2].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(3));
         }
 
         [Test]
@@ -141,6 +146,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             racialFeats.Add(new Feat());
             racialFeats.Add(new Feat());
             racialFeats.Add(new Feat());
+            racialFeats.Add(new Feat());
 
             racialFeats[0].Name = "feat with foci";
             racialFeats[0].Foci = ["focus 1", "focus 2"];
@@ -195,7 +201,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             mockClassFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, racialFeats, skills)).Returns(classFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            Assert.That(feats.Class, Is.EqualTo(classFeats));
+            Assert.That(feats.Class, Is.EquivalentTo(classFeats));
         }
 
         [Test]
@@ -206,24 +212,29 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
                 new(),
                 new(),
+                new(),
             };
 
             classFeats[0].Name = "feat with foci";
             classFeats[0].Foci = ["focus 1", "focus 2"];
             classFeats[1].Name = "feat with other foci";
             classFeats[1].Foci = ["focus 3", "focus 4"];
-            classFeats[2].Name = "feat with foci";
-            classFeats[2].Foci = ["focus 5", "focus 6"];
+            classFeats[2].Name = "feat without foci";
+            classFeats[2].Foci = [];
+            classFeats[3].Name = "feat with foci";
+            classFeats[3].Foci = ["focus 5", "focus 6"];
 
             mockClassFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, racialFeats, skills)).Returns(classFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
             var actualFeats = feats.Class.ToArray();
-            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
-            Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
-            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
-            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
-            Assert.That(actualFeats, Has.Length.EqualTo(2));
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat without foci"));
+            Assert.That(actualFeats[0].Foci, Is.Empty);
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
+            Assert.That(actualFeats[2].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[2].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(3));
         }
 
         [Test]
@@ -295,6 +306,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
                 new(),
                 new(),
+                new(),
             };
 
             classFeats[0].Name = "feat with foci";
@@ -352,7 +364,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            Assert.That(feats.Additional, Is.EqualTo(additionalFeats));
+            Assert.That(feats.Additional, Is.EquivalentTo(additionalFeats));
         }
 
         [Test]
@@ -363,24 +375,29 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
                 new(),
                 new(),
+                new(),
             };
 
-            additionalFeats[0].Name = "feat with focus";
+            additionalFeats[0].Name = "feat with foci";
             additionalFeats[0].Foci = ["focus 1", "focus 2"];
-            additionalFeats[1].Name = "feat with other focus";
+            additionalFeats[1].Name = "feat with other foci";
             additionalFeats[1].Foci = ["focus 3", "focus 4"];
-            additionalFeats[2].Name = "feat with focus";
-            additionalFeats[2].Foci = ["focus 5", "focus 6"];
+            additionalFeats[2].Name = "feat without foci";
+            additionalFeats[2].Foci = [];
+            additionalFeats[3].Name = "feat with foci";
+            additionalFeats[3].Foci = ["focus 5", "focus 6"];
 
             mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            var actualFeats = feats.Class.ToArray();
-            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
-            Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
-            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
-            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
-            Assert.That(actualFeats, Has.Length.EqualTo(2));
+            var actualFeats = feats.Additional.ToArray();
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat without foci"));
+            Assert.That(actualFeats[0].Foci, Is.Empty);
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
+            Assert.That(actualFeats[2].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[2].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(3));
         }
 
         [Test]
@@ -393,17 +410,17 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
             };
 
-            additionalFeats[0].Name = "feat with focus";
+            additionalFeats[0].Name = "feat with foci";
             additionalFeats[0].Foci = ["focus 1", GroupConstants.All];
-            additionalFeats[1].Name = "feat with other focus";
+            additionalFeats[1].Name = "feat with other foci";
             additionalFeats[1].Foci = ["focus 3", "focus 4"];
-            additionalFeats[2].Name = "feat with focus";
+            additionalFeats[2].Name = "feat with foci";
             additionalFeats[2].Foci = ["focus 5", "focus 6"];
 
             mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            var actualFeats = feats.Class.ToArray();
+            var actualFeats = feats.Additional.ToArray();
             Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
             Assert.That(actualFeats[0].Foci, Is.EquivalentTo([GroupConstants.All]));
             Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
@@ -421,24 +438,24 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
             };
 
-            additionalFeats[0].Name = "feat with focus";
+            additionalFeats[0].Name = "feat with foci";
             additionalFeats[0].Foci = ["focus 1", "focus 2"];
             additionalFeats[0].Power = 9266;
-            additionalFeats[1].Name = "feat with focus";
+            additionalFeats[1].Name = "feat with foci";
             additionalFeats[1].Foci = ["focus 3", "focus 4"];
             additionalFeats[1].Power = 42;
-            additionalFeats[2].Name = "feat with focus";
+            additionalFeats[2].Name = "feat with foci";
             additionalFeats[2].Foci = ["focus 5", "focus 6"];
             additionalFeats[2].Power = 9266;
 
             mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            var actualFeats = feats.Class.ToArray();
+            var actualFeats = feats.Additional.ToArray();
             Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
             Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
             Assert.That(actualFeats[0].Power, Is.EqualTo(9266));
-            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with foci"));
             Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
             Assert.That(actualFeats[1].Power, Is.EqualTo(42));
             Assert.That(actualFeats, Has.Length.EqualTo(2));
@@ -454,21 +471,21 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
                 new(),
             };
 
-            additionalFeats[0].Name = "feat with focus";
+            additionalFeats[0].Name = "feat with foci";
             additionalFeats[0].Foci = ["focus 1", "focus 2"];
             additionalFeats[0].Frequency.Quantity = 9266;
             additionalFeats[0].Frequency.TimePeriod = "sometimes";
-            additionalFeats[1].Name = "feat with other focus";
+            additionalFeats[1].Name = "feat with other foci";
             additionalFeats[1].Foci = ["focus 3", "focus 4"];
             additionalFeats[1].Frequency.Quantity = 42;
             additionalFeats[1].Frequency.TimePeriod = "sometimes";
-            additionalFeats[2].Name = "feat with focus";
+            additionalFeats[2].Name = "feat with foci";
             additionalFeats[2].Foci = ["focus 5", "focus 6"];
             additionalFeats[2].Frequency.Quantity = 9266;
             additionalFeats[2].Frequency.TimePeriod = "sometimes";
             additionalFeats.Add(new()
             {
-                Name = "feat with focus",
+                Name = "feat with foci",
                 Foci = ["focus 7", "focus 8"],
                 Frequency = new Frequency
                 {
@@ -480,7 +497,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
             mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
 
             var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
-            var actualFeats = feats.Class.ToArray();
+            var actualFeats = feats.Additional.ToArray();
             Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
             Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
             Assert.That(actualFeats[0].Frequency.Quantity, Is.EqualTo(9266));
@@ -499,10 +516,70 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
         [Test]
         public void ConsolidateAllFeatsWithFoci()
         {
-            // If powers differ, do not combine (Skill Bonus)
-            // Do not combine across Racial/Class/Additional
-            // If frequency differs, do not combine (spell-like abilities)
-            Assert.Fail("not yet written");
+            racialFeats.Add(new Feat());
+            racialFeats.Add(new Feat());
+            racialFeats.Add(new Feat());
+
+            racialFeats[0].Name = "feat with foci";
+            racialFeats[0].Foci = ["focus 1", "focus 2"];
+            racialFeats[1].Name = "feat with other foci";
+            racialFeats[1].Foci = ["focus 3", "focus 4"];
+            racialFeats[2].Name = "feat with foci";
+            racialFeats[2].Foci = ["focus 5", "focus 6"];
+
+            var classFeats = new List<Feat>
+            {
+                new(),
+                new(),
+                new(),
+            };
+
+            classFeats[0].Name = "feat with foci";
+            classFeats[0].Foci = ["focus 7", "focus 8"];
+            classFeats[1].Name = "feat with other foci";
+            classFeats[1].Foci = ["focus 9", "focus 10"];
+            classFeats[2].Name = "feat with foci";
+            classFeats[2].Foci = [GroupConstants.All];
+
+            mockClassFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, racialFeats, skills)).Returns(classFeats);
+
+            var additionalFeats = new List<Feat>
+            {
+                new(),
+                new(),
+                new(),
+            };
+
+            additionalFeats[0].Name = "feat with foci";
+            additionalFeats[0].Foci = ["focus 11", "focus 12"];
+            additionalFeats[1].Name = "feat with other foci";
+            additionalFeats[1].Foci = ["focus 13", "focus 14"];
+            additionalFeats[2].Name = "feat with foci";
+            additionalFeats[2].Foci = ["focus 15", "focus 16"];
+
+            mockAdditionalFeatsGenerator.Setup(g => g.GenerateWith(characterClass, race, stats, skills, baseAttack, It.IsAny<IEnumerable<Feat>>())).Returns(additionalFeats);
+
+            var feats = featsGenerator.GenerateWith(characterClass, race, stats, skills, baseAttack);
+            var actualFeats = feats.Racial.ToArray();
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 1", "focus 2", "focus 5", "focus 6"]));
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 3", "focus 4"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(2));
+
+            actualFeats = [.. feats.Class];
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[0].Foci, Is.EquivalentTo([GroupConstants.All]));
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 9", "focus 10"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(2));
+
+            actualFeats = [.. feats.Additional];
+            Assert.That(actualFeats[0].Name, Is.EqualTo("feat with foci"));
+            Assert.That(actualFeats[0].Foci, Is.EquivalentTo(["focus 11", "focus 12", "focus 15", "focus 16"]));
+            Assert.That(actualFeats[1].Name, Is.EqualTo("feat with other foci"));
+            Assert.That(actualFeats[1].Foci, Is.EquivalentTo(["focus 13", "focus 14"]));
+            Assert.That(actualFeats, Has.Length.EqualTo(2));
         }
     }
 }

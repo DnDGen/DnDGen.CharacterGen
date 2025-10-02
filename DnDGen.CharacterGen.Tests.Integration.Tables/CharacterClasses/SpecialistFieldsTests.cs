@@ -464,7 +464,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.CharacterClasses
             CharacterClassConstants.Schools.Transmutation)]
         public void SpecialistFields(string name, params string[] fields)
         {
-            base.DistinctCollection(name, fields);
+            base.AssertDistinctCollection(name, fields);
         }
 
         [TestCase(RaceConstants.BaseRaces.Aasimar)]
@@ -579,7 +579,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.CharacterClasses
                 CharacterClassConstants.Schools.Transmutation,
             };
 
-            DistinctCollection(race, fields);
+            AssertDistinctCollection(race, fields);
         }
     }
 }

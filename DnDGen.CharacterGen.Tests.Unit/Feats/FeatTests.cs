@@ -52,37 +52,35 @@ namespace DnDGen.CharacterGen.Tests.Unit.Feats
         [Test]
         public void Summary_ReturnsName()
         {
-            Assert.Fail("not yet written");
+            feat.Name = "my feat";
+            Assert.That(feat.Summary, Is.EqualTo("my feat"));
         }
 
         [Test]
         public void Summary_ReturnsNameWithFocus()
         {
-            Assert.Fail("not yet written");
+            feat.Name = "my feat";
+            feat.Foci = ["my focus"];
+
+            Assert.That(feat.Summary, Is.EqualTo("my feat (my focus)"));
         }
 
         [Test]
         public void Summary_ReturnsNameWithFoci()
         {
-            Assert.Fail("not yet written");
+            feat.Name = "my feat";
+            feat.Foci = ["my focus", "my other focus"];
+
+            Assert.That(feat.Summary, Is.EqualTo("my feat (my focus, my other focus)"));
         }
 
         [Test]
-        public void ToString_ReturnsName()
+        public void ToString_ReturnsSummary()
         {
-            Assert.Fail("not yet written");
-        }
+            feat.Name = "my feat";
+            feat.Foci = ["my focus", "my other focus"];
 
-        [Test]
-        public void ToString_ReturnsNameWithFocus()
-        {
-            Assert.Fail("not yet written");
-        }
-
-        [Test]
-        public void ToString_ReturnsNameWithFoci()
-        {
-            Assert.Fail("not yet written");
+            Assert.That(feat.ToString(), Is.EqualTo("my feat (my focus, my other focus)"));
         }
     }
 }

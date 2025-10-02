@@ -99,7 +99,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
         [TestCase(RaceConstants.Sizes.Tiny)]
         public void BaseRaceGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(GroupConstants.Monsters, baseRaces);
+            base.AssertDistinctCollection(GroupConstants.Monsters, baseRaces);
         }
 
         [Test]
@@ -241,7 +241,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(GroupConstants.All, baseRaces);
+            base.AssertDistinctCollection(GroupConstants.All, baseRaces);
         }
 
         [Test]
@@ -294,7 +294,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(RaceConstants.Sizes.Medium, baseRaces);
+            base.AssertDistinctCollection(RaceConstants.Sizes.Medium, baseRaces);
         }
 
         [Test]
@@ -319,7 +319,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.StormGiant,
             };
 
-            base.DistinctCollection(AlignmentConstants.LawfulGood, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.LawfulGood, baseRaces);
         }
 
         [Test]
@@ -358,7 +358,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.WoodElf,
             };
 
-            base.DistinctCollection(AlignmentConstants.NeutralGood, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.NeutralGood, baseRaces);
         }
 
         [Test]
@@ -391,7 +391,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.WildElf,
             };
 
-            base.DistinctCollection(AlignmentConstants.ChaoticGood, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.ChaoticGood, baseRaces);
         }
 
         [Test]
@@ -431,7 +431,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.Tiefling,
             };
 
-            base.DistinctCollection(AlignmentConstants.LawfulNeutral, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.LawfulNeutral, baseRaces);
         }
 
         [Test]
@@ -474,7 +474,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.WoodElf,
             };
 
-            base.DistinctCollection(AlignmentConstants.TrueNeutral, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.TrueNeutral, baseRaces);
         }
 
         [Test]
@@ -532,7 +532,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(AlignmentConstants.ChaoticNeutral, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.ChaoticNeutral, baseRaces);
         }
 
         [Test]
@@ -568,7 +568,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.Tiefling,
             };
 
-            base.DistinctCollection(AlignmentConstants.LawfulEvil, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.LawfulEvil, baseRaces);
         }
 
         [Test]
@@ -628,7 +628,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(AlignmentConstants.NeutralEvil, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.NeutralEvil, baseRaces);
         }
 
         [Test]
@@ -675,7 +675,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(AlignmentConstants.ChaoticEvil, baseRaces);
+            base.AssertDistinctCollection(AlignmentConstants.ChaoticEvil, baseRaces);
         }
 
         [Test]
@@ -756,7 +756,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Adept, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Adept, baseRaces);
         }
 
         [Test]
@@ -837,7 +837,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Aristocrat, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Aristocrat, baseRaces);
         }
 
         [Test]
@@ -916,7 +916,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Barbarian, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Barbarian, baseRaces);
         }
 
         [Test]
@@ -997,7 +997,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Bard, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Bard, baseRaces);
         }
 
         [Test]
@@ -1078,7 +1078,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Cleric, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Cleric, baseRaces);
         }
 
         [Test]
@@ -1159,7 +1159,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Commoner, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Commoner, baseRaces);
         }
 
         [Test]
@@ -1240,7 +1240,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Druid, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Druid, baseRaces);
         }
 
         [Test]
@@ -1321,7 +1321,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Expert, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Expert, baseRaces);
         }
 
         [Test]
@@ -1400,7 +1400,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Fighter, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Fighter, baseRaces);
         }
 
         [Test]
@@ -1479,7 +1479,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Monk, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Monk, baseRaces);
 
         }
 
@@ -1505,7 +1505,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.StormGiant,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Paladin, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Paladin, baseRaces);
         }
 
         [Test]
@@ -1584,7 +1584,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Ranger, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Ranger, baseRaces);
         }
 
         [Test]
@@ -1663,7 +1663,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Rogue, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Rogue, baseRaces);
         }
 
         [Test]
@@ -1744,7 +1744,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Sorcerer, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Sorcerer, baseRaces);
         }
 
         [Test]
@@ -1823,7 +1823,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Warrior, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Warrior, baseRaces);
         }
 
         [Test]
@@ -1904,7 +1904,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces
                 RaceConstants.BaseRaces.YuanTiPureblood,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Wizard, baseRaces);
+            base.AssertDistinctCollection(CharacterClassConstants.Wizard, baseRaces);
         }
 
         [Test]

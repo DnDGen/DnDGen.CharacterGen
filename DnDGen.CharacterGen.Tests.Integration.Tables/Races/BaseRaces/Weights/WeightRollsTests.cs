@@ -94,7 +94,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Weights
         [TestCase(RaceConstants.BaseRaces.YuanTiPureblood, "2d4")]
         public void WeightRoll(string name, string weightRoll)
         {
-            base.DistinctCollection(name, new[] { weightRoll });
+            base.AssertDistinctCollection(name, new[] { weightRoll });
         }
     }
 }

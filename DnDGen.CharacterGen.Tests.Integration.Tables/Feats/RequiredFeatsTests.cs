@@ -151,7 +151,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
             FeatConstants.SpringAttack)]
         public void RequiredFeats(string name, params string[] requiredFeats)
         {
-            DistinctCollection(name, requiredFeats);
+            AssertDistinctCollection(name, requiredFeats);
         }
 
         [TestCase(FeatConstants.AugmentSummoning,
@@ -197,7 +197,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
         public void RequiredFeat(string name, string requiredFeat, string requiredFocus)
         {
             var collection = new[] { $"{requiredFeat}/{requiredFocus}" };
-            DistinctCollection(name, collection);
+            AssertDistinctCollection(name, collection);
         }
     }
 }

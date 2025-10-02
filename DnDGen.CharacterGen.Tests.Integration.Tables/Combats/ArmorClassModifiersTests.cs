@@ -41,7 +41,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Combats
             WondrousItemConstants.BracersOfArmor)]
         public void ArmorClassModifier(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
     }
 }

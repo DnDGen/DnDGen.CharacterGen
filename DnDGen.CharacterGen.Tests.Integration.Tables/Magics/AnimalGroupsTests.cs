@@ -69,7 +69,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
         [TestCase(CharacterClassConstants.Warrior)]
         public void AnimalGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [TestCase(CharacterClassConstants.Sorcerer)]
@@ -132,7 +132,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Weasel,
             };
 
-            DistinctCollection(className, animals);
+            AssertDistinctCollection(className, animals);
         }
 
         [Test]
@@ -183,7 +183,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(FeatConstants.ImprovedFamiliar, animals);
+            AssertDistinctCollection(FeatConstants.ImprovedFamiliar, animals);
         }
 
         [Test]
@@ -239,7 +239,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Wolverine,
             };
 
-            DistinctCollection(CharacterClassConstants.Druid, animals);
+            AssertDistinctCollection(CharacterClassConstants.Druid, animals);
         }
 
         [Test]
@@ -345,7 +345,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Wolverine,
             };
 
-            DistinctCollection(RaceConstants.Sizes.Small, animals);
+            AssertDistinctCollection(RaceConstants.Sizes.Small, animals);
         }
 
         [Test]
@@ -450,7 +450,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(RaceConstants.Sizes.Medium, animals);
+            AssertDistinctCollection(RaceConstants.Sizes.Medium, animals);
         }
 
         [TestCase(RaceConstants.Metaraces.HalfCelestial)]
@@ -548,7 +548,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(metarace, animals);
+            AssertDistinctCollection(metarace, animals);
         }
 
         [TestCase(RaceConstants.Metaraces.Ghost)]
@@ -660,7 +660,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(metarace, animals);
+            AssertDistinctCollection(metarace, animals);
         }
 
         [TestCase(RaceConstants.Metaraces.HalfFiend)]
@@ -761,7 +761,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(metarace, animals);
+            AssertDistinctCollection(metarace, animals);
         }
 
         [TestCase(RaceConstants.Sizes.Tiny)]
@@ -869,7 +869,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.WaterMephit
             };
 
-            DistinctCollection(size, animals);
+            AssertDistinctCollection(size, animals);
         }
 
         [Test]
@@ -964,7 +964,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.LawfulGood, animals);
+            AssertDistinctCollection(AlignmentConstants.LawfulGood, animals);
         }
 
         [Test]
@@ -1059,7 +1059,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.NeutralGood, animals);
+            AssertDistinctCollection(AlignmentConstants.NeutralGood, animals);
         }
 
         [Test]
@@ -1152,7 +1152,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.ChaoticGood, animals);
+            AssertDistinctCollection(AlignmentConstants.ChaoticGood, animals);
         }
 
         [Test]
@@ -1258,7 +1258,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.LawfulNeutral, animals);
+            AssertDistinctCollection(AlignmentConstants.LawfulNeutral, animals);
         }
 
         [Test]
@@ -1365,7 +1365,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.TrueNeutral, animals);
+            AssertDistinctCollection(AlignmentConstants.TrueNeutral, animals);
         }
 
         [Test]
@@ -1469,7 +1469,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.ChaoticNeutral, animals);
+            AssertDistinctCollection(AlignmentConstants.ChaoticNeutral, animals);
         }
 
         [Test]
@@ -1565,7 +1565,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.LawfulEvil, animals);
+            AssertDistinctCollection(AlignmentConstants.LawfulEvil, animals);
         }
 
         [Test]
@@ -1662,7 +1662,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.NeutralEvil, animals);
+            AssertDistinctCollection(AlignmentConstants.NeutralEvil, animals);
         }
 
         [Test]
@@ -1757,7 +1757,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics
                 RaceConstants.BaseRaces.Animals.Warpony
             };
 
-            DistinctCollection(AlignmentConstants.ChaoticEvil, animals);
+            AssertDistinctCollection(AlignmentConstants.ChaoticEvil, animals);
         }
     }
 }

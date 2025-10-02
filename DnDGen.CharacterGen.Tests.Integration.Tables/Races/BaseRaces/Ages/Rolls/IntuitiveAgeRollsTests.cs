@@ -95,7 +95,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Ages.Roll
         [TestCase(RaceConstants.BaseRaces.YuanTiPureblood, "1d4")]
         public void IntuitiveAgeRoll(string name, string ageRoll)
         {
-            DistinctCollection(name, ageRoll);
+            AssertDistinctCollection(name, ageRoll);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Abilities
             AbilityConstants.Wisdom)]
         public void AbilityGroup(string name, params string[] abilities)
         {
-            base.Collection(name, abilities);
+            base.AssertCollection(name, abilities);
         }
     }
 }

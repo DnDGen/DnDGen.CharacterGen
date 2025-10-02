@@ -34,22 +34,22 @@ namespace DnDGen.CharacterGen.Items
             return weapon;
         }
 
-        private IEnumerable<Feat> GetNonProficiencyFeatsWithWeaponFoci(IEnumerable<Feat> feats)
+        private IEnumerable<Feat> GetNonProficiencyFeatsWithWeaponFoci(IEnumerable<Feat> feats, IEnumerable<string> filteredWeapons = null)
         {
             var proficiencyFeats = GetProficiencyFeats(feats);
             var allWeapons = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, ItemTypeConstants.Weapon);
 
             var nonProficiencyFeats = feats.Except(proficiencyFeats).Where(f => f.Name != FeatConstants.WeaponFamiliarity);
-            return nonProficiencyFeats.Where(f => GetPossibleWeapons(f, feats).Any());
+            return nonProficiencyFeats.Where(f => GetPossibleWeapons(f, feats, filteredWeapons).Any());
         }
 
-        private IEnumerable<Feat> GetProficiencyFeats(IEnumerable<Feat> feats)
+        private IEnumerable<Feat> GetProficiencyFeats(IEnumerable<Feat> feats, IEnumerable<string> filteredWeapons = null)
         {
             var proficiencyFeatNames = collectionsSelector.SelectFrom(
                 Config.Name,
                 TableNameConstants.Set.Collection.FeatGroups,
                 ItemTypeConstants.Weapon + GroupConstants.Proficiency);
-            return feats.Where(f => proficiencyFeatNames.Contains(f.Name));
+            return feats.Where(f => proficiencyFeatNames.Contains(f.Name) && GetPossibleWeapons(f, feats, filteredWeapons).Any());
         }
 
         public Weapon GenerateAmmunition(CharacterClass characterClass, Race race, string ammunitionType)
@@ -87,11 +87,12 @@ namespace DnDGen.CharacterGen.Items
             return proficiencyWeapons.Concat(nonProficiencyWeapons).Intersect(filteredWeapons);
         }
 
-        private IEnumerable<string> GetPossibleWeapons(Feat feat, IEnumerable<Feat> allFeats)
+        private IEnumerable<string> GetPossibleWeapons(Feat feat, IEnumerable<Feat> allFeats, IEnumerable<string> filteredWeapons = null)
         {
             var possibleWeapons = feat.Foci;
+            var isWeaponFeat = collectionsSelector.IsCollection(Config.Name, TableNameConstants.Set.Collection.FeatFoci, feat.Name);
 
-            if (feat.Foci.Contains(FeatConstants.Foci.All))
+            if (feat.Foci.Contains(FeatConstants.Foci.All) && isWeaponFeat)
             {
                 possibleWeapons = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatFoci, feat.Name);
 
@@ -102,8 +103,8 @@ namespace DnDGen.CharacterGen.Items
                 }
             }
 
-            var allWeapons = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, ItemTypeConstants.Weapon);
-            return possibleWeapons.Intersect(allWeapons);
+            filteredWeapons ??= collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, ItemTypeConstants.Weapon);
+            return possibleWeapons.Intersect(filteredWeapons);
         }
 
         private Weapon GenerateFrom(string weaponName, CharacterClass characterClass, Race race)
@@ -148,30 +149,30 @@ namespace DnDGen.CharacterGen.Items
 
         private string GetPreferredWeapon(FeatCollections feats, IEnumerable<string> filteredWeapons)
         {
-            var commonWeapons = GetPreferredWeapons(feats.Additional).Intersect(filteredWeapons);
-            var uncommonWeapons = GetPreferredWeapons(feats.Class).Intersect(filteredWeapons);
-            var rareWeapons = GetPreferredWeapons(feats.Racial).Intersect(filteredWeapons);
+            var commonWeapons = GetPreferredWeapons(feats.Additional, filteredWeapons);
+            var uncommonWeapons = GetPreferredWeapons(feats.Class, filteredWeapons);
+            var rareWeapons = GetPreferredWeapons(feats.Racial, filteredWeapons);
 
             var preferredWeapon = collectionsSelector.SelectRandomFrom(commonWeapons, uncommonWeapons, rareWeapons);
             return preferredWeapon;
         }
 
-        private IEnumerable<string> GetPreferredWeapons(IEnumerable<Feat> feats)
+        private IEnumerable<string> GetPreferredWeapons(IEnumerable<Feat> feats, IEnumerable<string> filteredWeapons)
         {
-            var proficiencyFeats = GetProficiencyFeats(feats);
+            var proficiencyFeats = GetProficiencyFeats(feats, filteredWeapons);
             if (!proficiencyFeats.Any())
                 return [];
 
-            var preferredFeat = GetPreferredFeat(feats);
-            var preferredWeapons = GetPossibleWeapons(preferredFeat, feats);
+            var preferredFeat = GetPreferredFeat(feats, filteredWeapons);
+            var preferredWeapons = GetPossibleWeapons(preferredFeat, feats, filteredWeapons);
 
             return preferredWeapons;
         }
 
-        private Feat GetPreferredFeat(IEnumerable<Feat> feats)
+        private Feat GetPreferredFeat(IEnumerable<Feat> feats, IEnumerable<string> filteredWeapons)
         {
-            var nonProficiencyFeats = GetNonProficiencyFeatsWithWeaponFoci(feats);
-            var proficiencyFeats = GetProficiencyFeats(feats);
+            var nonProficiencyFeats = GetNonProficiencyFeatsWithWeaponFoci(feats, filteredWeapons);
+            var proficiencyFeats = GetProficiencyFeats(feats, filteredWeapons);
 
             return collectionsSelector.SelectRandomFrom(
                 nonProficiencyFeats,

@@ -35,10 +35,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables
             AssertCollection(table.Keys, names);
         }
 
-        protected IEnumerable<string> GetCollection(string name)
-        {
-            return table[name];
-        }
+        protected IEnumerable<string> GetCollection(string name) => table[name];
 
         private void AssertUnique(IEnumerable<string> collection)
         {
@@ -54,7 +51,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables
                 indices[i] = string.Empty;
         }
 
-        public virtual void Collection(string name, params string[] collection)
+        public virtual void AssertCollection(string name, params string[] collection)
         {
             Assert.That(table.Keys, Contains.Item(name), tableName);
             AssertCollection(table[name], collection);
@@ -65,7 +62,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables
             Assert.That(actual, Is.EquivalentTo(expected));
         }
 
-        public virtual void OrderedCollection(string name, params string[] expected)
+        public virtual void AssertOrderedCollection(string name, params string[] expected)
         {
             Assert.That(table.Keys, Contains.Item(name), tableName);
 
@@ -84,10 +81,10 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables
             Assert.That(table[name], Is.EqualTo(expected));
         }
 
-        public virtual void DistinctCollection(string name, params string[] expected)
+        public virtual void AssertDistinctCollection(string name, params string[] expected)
         {
             AssertUnique(expected);
-            Collection(name, expected);
+            AssertCollection(name, expected);
             AssertUnique(table[name]);
         }
     }

@@ -28,9 +28,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics.Spells.Known.Cleri
         [TestCase("7", SpellConstants.Destruction)]
         [TestCase("8", SpellConstants.CreateGreaterUndead)]
         [TestCase("9", SpellConstants.WailOfTheBanshee)]
-        public override void Collection(string name, params string[] collection)
+        public override void AssertCollection(string name, params string[] collection)
         {
-            base.Collection(name, collection);
+            base.AssertCollection(name, collection);
         }
     }
 }

@@ -86,7 +86,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Ages.Roll
         [TestCase(RaceConstants.BaseRaces.YuanTiPureblood, "3d20")]
         public void MaximumAgeRoll(string name, string ageRoll)
         {
-            base.DistinctCollection(name, ageRoll);
+            base.AssertDistinctCollection(name, ageRoll);
         }
 
         [TestCase(RaceConstants.BaseRaces.BlueSlaad)]
@@ -99,7 +99,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Ages.Roll
         [TestCase(RaceConstants.BaseRaces.RedSlaad)]
         public void ImmortalCreatures(string creature)
         {
-            base.DistinctCollection(creature, RaceConstants.Ages.Ageless.ToString());
+            base.AssertDistinctCollection(creature, RaceConstants.Ages.Ageless.ToString());
         }
     }
 }

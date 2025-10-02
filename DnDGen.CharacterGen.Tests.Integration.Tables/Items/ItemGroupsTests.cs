@@ -36,30 +36,24 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
             AssertCollectionNames(names);
         }
 
-        [TestCase(FeatConstants.HeavyArmorProficiency,
-            ArmorConstants.SplintMail,
-            ArmorConstants.BandedMail,
-            ArmorConstants.HalfPlate,
-            ArmorConstants.FullPlate)]
-        [TestCase(FeatConstants.LightArmorProficiency,
-            ArmorConstants.PaddedArmor,
-            ArmorConstants.LeatherArmor,
-            ArmorConstants.StuddedLeatherArmor,
-            ArmorConstants.ChainShirt,
-            ArmorConstants.ElvenChain,
-            ArmorConstants.CelestialArmor)]
-        [TestCase(FeatConstants.MediumArmorProficiency,
-            ArmorConstants.HideArmor,
-            ArmorConstants.ScaleMail,
-            ArmorConstants.Chainmail,
-            ArmorConstants.Breastplate,
-            ArmorConstants.FullPlateOfSpeed)]
-        [TestCase(FeatConstants.ShieldProficiency,
-            ArmorConstants.Buckler,
-            ArmorConstants.HeavySteelShield,
-            ArmorConstants.HeavyWoodenShield,
-            ArmorConstants.LightSteelShield,
-            ArmorConstants.LightWoodenShield)]
+        //[TestCase(FeatConstants.HeavyArmorProficiency,
+        //    ArmorConstants.SplintMail,
+        //    ArmorConstants.BandedMail,
+        //    ArmorConstants.HalfPlate,
+        //    ArmorConstants.FullPlate)]
+        //[TestCase(FeatConstants.LightArmorProficiency,
+        //    ArmorConstants.PaddedArmor,
+        //    ArmorConstants.LeatherArmor,
+        //    ArmorConstants.StuddedLeatherArmor,
+        //    ArmorConstants.ChainShirt,
+        //    ArmorConstants.ElvenChain,
+        //    ArmorConstants.CelestialArmor)]
+        //[TestCase(FeatConstants.MediumArmorProficiency,
+        //    ArmorConstants.HideArmor,
+        //    ArmorConstants.ScaleMail,
+        //    ArmorConstants.Chainmail,
+        //    ArmorConstants.Breastplate,
+        //    ArmorConstants.FullPlateOfSpeed)]
         [TestCase(FeatConstants.TowerShieldProficiency, ArmorConstants.TowerShield)]
         [TestCase(AttributeConstants.Metal,
             ArmorConstants.SplintMail,
@@ -76,20 +70,51 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
             ArmorConstants.FullPlateOfSpeed,
             ArmorConstants.HeavySteelShield,
             ArmorConstants.LightSteelShield)]
-        [TestCase(AttributeConstants.Specific,
-            ArmorConstants.ElvenChain,
-            ArmorConstants.CelestialArmor,
-            ArmorConstants.FullPlateOfSpeed)]
         public void ItemGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
+        }
+
+        [Test]
+        public void ItemGroup_LightArmorProficiency()
+        {
+            var lightArmors = ArmorConstants.GetAllLightArmors(true);
+            AssertDistinctCollection(FeatConstants.LightArmorProficiency, [.. lightArmors]);
+        }
+
+        [Test]
+        public void ItemGroup_MediumArmorProficiency()
+        {
+            var mediumArmors = ArmorConstants.GetAllMediumArmors(true);
+            AssertDistinctCollection(FeatConstants.MediumArmorProficiency, [.. mediumArmors]);
+        }
+
+        [Test]
+        public void ItemGroup_HeavyArmorProficiency()
+        {
+            var heavyArmors = ArmorConstants.GetAllHeavyArmors(true);
+            AssertDistinctCollection(FeatConstants.HeavyArmorProficiency, [.. heavyArmors]);
+        }
+
+        [Test]
+        public void ItemGroup_ShieldProficiency()
+        {
+            var shields = ArmorConstants.GetAllShields(true).Except([ArmorConstants.TowerShield]);
+            AssertDistinctCollection(FeatConstants.ShieldProficiency, [.. shields]);
+        }
+
+        [Test]
+        public void ItemGroup_Specific_ContainsAllSpecificArmors()
+        {
+            var armors = ArmorConstants.GetAllSpecificArmorsAndShields();
+            AssertDistinctCollection(AttributeConstants.Specific, [.. armors]);
         }
 
         [Test]
         public void ItemGroup_Weapons()
         {
             var weapons = WeaponConstants.GetAllWeapons(false, false).ToArray();
-            base.DistinctCollection(ItemTypeConstants.Weapon, weapons);
+            base.AssertDistinctCollection(ItemTypeConstants.Weapon, weapons);
         }
 
         [Test]
@@ -97,11 +122,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
         {
             var weapons = WeaponConstants
                 .GetAllAmmunition(false, false)
-                .Except(new[] {
-                    WeaponConstants.Shuriken,
-                })
+                .Except([WeaponConstants.Shuriken])
                 .ToArray();
-            base.DistinctCollection(AttributeConstants.Ammunition, weapons);
+            base.AssertDistinctCollection(AttributeConstants.Ammunition, weapons);
         }
 
         [Test]
@@ -109,11 +132,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
         {
             var weapons = WeaponConstants
                 .GetAllMelee(false, false)
-                .Except(new[] {
-                    WeaponConstants.ThrowingAxe,
-                })
+                .Except([WeaponConstants.ThrowingAxe])
                 .ToArray();
-            base.DistinctCollection(AttributeConstants.Melee, weapons);
+            base.AssertDistinctCollection(AttributeConstants.Melee, weapons);
         }
 
         [Test]
@@ -121,19 +142,16 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
         {
             var weapons = WeaponConstants
                 .GetAllRanged(false, false, false)
-                .Union(new[] {
-                    WeaponConstants.Shuriken,
-                    WeaponConstants.ThrowingAxe,
-                })
+                .Union([WeaponConstants.Shuriken, WeaponConstants.ThrowingAxe])
                 .ToArray();
-            base.DistinctCollection(AttributeConstants.Ranged, weapons);
+            base.AssertDistinctCollection(AttributeConstants.Ranged, weapons);
         }
 
         [Test]
         public void ItemGroup_TwoHanded()
         {
             var weapons = WeaponConstants.GetAllTwoHandedMelee(false, false).ToArray();
-            base.DistinctCollection(AttributeConstants.TwoHanded, weapons);
+            base.AssertDistinctCollection(AttributeConstants.TwoHanded, weapons);
         }
     }
 }

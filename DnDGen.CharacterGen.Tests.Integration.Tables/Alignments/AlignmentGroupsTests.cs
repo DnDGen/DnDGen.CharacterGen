@@ -105,7 +105,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Alignments
             AlignmentConstants.ChaoticEvil)]
         public void AlignmentGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
     }
 }

@@ -892,5 +892,25 @@ namespace DnDGen.CharacterGen.Tests.Integration.Generators.Characters
             Assert.That(character.Abilities, Does.Not.ContainKey(AbilityConstants.Constitution), character.Summary);
             Assert.That(character.ChallengeRating, Is.EqualTo(15), character.Summary);
         }
+
+        [Test]
+        public void DEBUG_GenerateBetaCharacter()
+        {
+            var classNameRandomizer = GetNewInstanceOf<ISetClassNameRandomizer>();
+            var levelRandomizer = GetNewInstanceOf<ILevelRandomizer>(LevelRandomizerTypeConstants.Low);
+            var abilitiesRandomizer = GetNewInstanceOf<IAbilitiesRandomizer>(AbilitiesRandomizerTypeConstants.OnesAsSixes);
+
+            classNameRandomizer.SetClassName = CharacterClassConstants.Barbarian;
+
+            var character = characterGenerator.GenerateWith(
+                alignmentRandomizer,
+                classNameRandomizer,
+                levelRandomizer,
+                baseRaceRandomizer,
+                metaraceRandomizer,
+                abilitiesRandomizer);
+
+            characterAsserter.AssertCharacter(character);
+        }
     }
 }

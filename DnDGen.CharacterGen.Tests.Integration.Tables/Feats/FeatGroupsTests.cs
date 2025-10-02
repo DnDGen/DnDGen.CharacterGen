@@ -155,9 +155,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
         [TestCase(AttributeConstants.Shield + GroupConstants.Proficiency,
             FeatConstants.ShieldProficiency,
             FeatConstants.TowerShieldProficiency)]
-        public override void DistinctCollection(string name, params string[] collection)
+        public override void AssertDistinctCollection(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [Test]
@@ -194,7 +194,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 FeatConstants.SpellPenetration
             };
 
-            base.DistinctCollection(GroupConstants.HasClassRequirements, featNames);
+            base.AssertDistinctCollection(GroupConstants.HasClassRequirements, featNames);
         }
 
         [Test]
@@ -252,7 +252,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 FeatConstants.GreaterWeaponSpecialization
             };
 
-            base.DistinctCollection(GroupConstants.FighterBonusFeats, featNames);
+            base.AssertDistinctCollection(GroupConstants.FighterBonusFeats, featNames);
         }
     }
 }

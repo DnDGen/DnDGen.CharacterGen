@@ -106,7 +106,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
             SkillConstants.Tumble)]
         public void SkillGroup(string name, params string[] skills)
         {
-            base.DistinctCollection(name, skills);
+            base.AssertDistinctCollection(name, skills);
         }
 
         [Test]
@@ -150,7 +150,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.UseRope,
             };
 
-            base.DistinctCollection(GroupConstants.All, skills);
+            base.AssertDistinctCollection(GroupConstants.All, skills);
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.UseRope,
             };
 
-            base.DistinctCollection(GroupConstants.Untrained, skills);
+            base.AssertDistinctCollection(GroupConstants.Untrained, skills);
         }
 
         [Test]
@@ -234,7 +234,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.Foci.Craft.Woodworking,
             };
 
-            base.DistinctCollection(SkillConstants.Craft, foci);
+            base.AssertDistinctCollection(SkillConstants.Craft, foci);
         }
 
         [Test]
@@ -254,7 +254,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.Foci.Knowledge.ThePlanes,
             };
 
-            base.DistinctCollection(SkillConstants.Knowledge, foci);
+            base.AssertDistinctCollection(SkillConstants.Knowledge, foci);
         }
 
         [Test]
@@ -273,7 +273,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.Foci.Perform.WindInstruments,
             };
 
-            base.DistinctCollection(SkillConstants.Perform, foci);
+            base.AssertDistinctCollection(SkillConstants.Perform, foci);
         }
 
         [Test]
@@ -368,7 +368,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
                 SkillConstants.Foci.Profession.WildernessGuide,
             };
 
-            base.DistinctCollection(SkillConstants.Profession, foci);
+            base.AssertDistinctCollection(SkillConstants.Profession, foci);
         }
     }
 }

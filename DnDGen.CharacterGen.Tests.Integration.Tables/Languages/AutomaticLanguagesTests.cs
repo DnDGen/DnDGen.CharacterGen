@@ -234,7 +234,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Languages
         [TestCase(RaceConstants.Metaraces.Werewolf_Dire)]
         public void AutomaticLanguages(string name, params string[] languages)
         {
-            base.DistinctCollection(name, languages);
+            base.AssertDistinctCollection(name, languages);
         }
     }
 }

@@ -78,7 +78,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Abilities
             AbilityConstants.Constitution)]
         public void AbilityPriorities(string name, params string[] items)
         {
-            base.OrderedCollection(name, items);
+            base.AssertOrderedCollection(name, items);
         }
     }
 }

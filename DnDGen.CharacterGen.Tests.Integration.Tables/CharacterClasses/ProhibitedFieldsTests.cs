@@ -82,9 +82,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.CharacterClasses
         [TestCase(AlignmentConstants.ChaoticEvil,
             CharacterClassConstants.Domains.Law,
             CharacterClassConstants.Domains.Good)]
-        public override void DistinctCollection(string name, params string[] collection)
+        public override void AssertDistinctCollection(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
     }
 }
