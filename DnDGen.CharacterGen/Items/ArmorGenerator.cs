@@ -34,27 +34,11 @@ namespace DnDGen.CharacterGen.Items
                 return null;
 
             var power = treasureLevelSelector.SelectPowerFrom(characterClass, race);
-            var armorName = GetPreferredArmor(feats, ItemTypeConstants.Armor, characterClass, power);
+            var armorName = GetPreferredArmor(feats, ItemTypeConstants.Armor, characterClass);
             var item = GenerateArmor(power, armorName, race, characterClass);
 
             return item as Armor;
         }
-
-        //Source: https://www.d20srd.org/srd/magicItems/magicArmor.htm
-        private static double GetSpecificThreshold(string power) => power switch
-        {
-            PowerConstants.Minor => .98,
-            PowerConstants.Medium or PowerConstants.Major => .97,
-            _ => 1.01,
-        };
-
-        //Source: https://www.d20srd.org/srd/magicItems/magicArmor.htm
-        private static int GetRollAgainThreshold(string power) => power switch
-        {
-            PowerConstants.Minor => 92,
-            PowerConstants.Medium or PowerConstants.Major => 64,
-            _ => 101,
-        };
 
         public Armor GenerateShieldFrom(FeatCollections feats, CharacterClass characterClass, Race race)
         {
@@ -63,7 +47,7 @@ namespace DnDGen.CharacterGen.Items
                 return null;
 
             var power = treasureLevelSelector.SelectPowerFrom(characterClass, race);
-            var shieldName = GetPreferredArmor(feats, AttributeConstants.Shield, characterClass, power);
+            var shieldName = GetPreferredArmor(feats, AttributeConstants.Shield, characterClass);
             var item = GenerateArmor(power, shieldName, race, characterClass);
 
             return item as Armor;
@@ -88,27 +72,15 @@ namespace DnDGen.CharacterGen.Items
             return magicalArmorGenerator.Generate(power, armorName, traits);
         }
 
-        private string GetPreferredArmor(FeatCollections feats, string armorType, CharacterClass characterClass, string power)
+        private string GetPreferredArmor(FeatCollections feats, string armorType, CharacterClass characterClass)
         {
-            var specificThreshold = GetSpecificThreshold(power);
-            var rollAgainThreshold = GetRollAgainThreshold(power);
-
-            //INFO: Need to filter out specific armors, if they aren't a possibility
-            //Even though TreasureGen can handle specific armors from base versions, there are some specific armors that jump proficiency categories,
-            //such as full plate of speed being medium proficiency instead of heavy
-            bool isSpecific;
-            do
-            {
-                isSpecific = dice.Roll().Percentile().AsTrueOrFalse(specificThreshold);
-            } while (!isSpecific && dice.Roll().Percentile().AsTrueOrFalse(rollAgainThreshold));
-
             //INFO: Armor has a 5% chance to be made of a special material
             //There are 3 special materials that can apply to metal armor: Adamantine, mithral, and dragonhide
             var isDragonhide = dice.Roll().Percentile().AsTrueOrFalse(.95) && dice.Roll().d3().AsTrueOrFalse(3);
 
-            var commonArmors = GetPreferredArmors(feats.Additional, armorType, characterClass, isSpecific, isDragonhide);
-            var uncommonArmors = GetPreferredArmors(feats.Class, armorType, characterClass, isSpecific, isDragonhide);
-            var rareArmors = GetPreferredArmors(feats.Racial, armorType, characterClass, isSpecific, isDragonhide);
+            var commonArmors = GetPreferredArmors(feats.Additional, armorType, characterClass, isDragonhide);
+            var uncommonArmors = GetPreferredArmors(feats.Class, armorType, characterClass, isDragonhide);
+            var rareArmors = GetPreferredArmors(feats.Racial, armorType, characterClass, isDragonhide);
 
             var preferredArmor = collectionsSelector.SelectRandomFrom(commonArmors, uncommonArmors, rareArmors);
             return preferredArmor;
@@ -120,7 +92,7 @@ namespace DnDGen.CharacterGen.Items
             return feats.Where(f => proficiencyFeatNames.Contains(f.Name));
         }
 
-        private IEnumerable<string> GetPreferredArmors(IEnumerable<Feat> feats, string armorType, CharacterClass characterClass, bool isSpecific, bool isDragonhide)
+        private IEnumerable<string> GetPreferredArmors(IEnumerable<Feat> feats, string armorType, CharacterClass characterClass, bool isDragonhide)
         {
             var proficiencyFeats = GetArmorProficiencyFeats(feats, armorType);
             var proficiencyFeatNames = proficiencyFeats.Select(f => f.Name);
@@ -142,20 +114,17 @@ namespace DnDGen.CharacterGen.Items
 
             IEnumerable<string> GetArmors(string featName)
             {
+                //INFO: Technically, certain armors such as Full Plate of Speed and Elven Chain jump proficiency feats (they are 1 lighter)
+                //However, if we try to manage specificity here, we lose nuance from within TreasureGen (such as a Minor specific versus a Major specific),
+                //So, we are explicitly ignoring the edge case where jumping proficiency might make something available
+                //Example: Character proficient in Medium armor could technically use the Full Plate of Speed, but that will nevr generate because the base armor is Heavy
                 var armors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, featName);
-
-                var specificArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Specific);
-                if (isSpecific)
-                    armors = armors.Intersect(specificArmors);
-                else
-                    armors = armors.Except(specificArmors);
 
                 if (characterClass.Name != CharacterClassConstants.Druid)
                     return armors;
 
                 var metalArmors = collectionsSelector.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Metal);
-                //INFO: Even if the armor should be Dragonhide, specific armors shouldn't have modified special materials
-                if (!isDragonhide || isSpecific)
+                if (!isDragonhide)
                     return armors.Except(metalArmors);
 
                 return armors;

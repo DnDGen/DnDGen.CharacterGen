@@ -9,10 +9,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
     [TestFixture]
     public class ItemGroupsTests : CollectionTests
     {
-        protected override string tableName
-        {
-            get { return TableNameConstants.Set.Collection.ItemGroups; }
-        }
+        protected override string tableName => TableNameConstants.Set.Collection.ItemGroups;
 
         [Test]
         public override void CollectionNames()
@@ -25,7 +22,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
                 FeatConstants.ShieldProficiency,
                 FeatConstants.TowerShieldProficiency,
                 AttributeConstants.Metal,
-                AttributeConstants.Specific,
                 ItemTypeConstants.Weapon,
                 AttributeConstants.Ammunition,
                 AttributeConstants.Melee,
@@ -36,24 +32,6 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
             AssertCollectionNames(names);
         }
 
-        //[TestCase(FeatConstants.HeavyArmorProficiency,
-        //    ArmorConstants.SplintMail,
-        //    ArmorConstants.BandedMail,
-        //    ArmorConstants.HalfPlate,
-        //    ArmorConstants.FullPlate)]
-        //[TestCase(FeatConstants.LightArmorProficiency,
-        //    ArmorConstants.PaddedArmor,
-        //    ArmorConstants.LeatherArmor,
-        //    ArmorConstants.StuddedLeatherArmor,
-        //    ArmorConstants.ChainShirt,
-        //    ArmorConstants.ElvenChain,
-        //    ArmorConstants.CelestialArmor)]
-        //[TestCase(FeatConstants.MediumArmorProficiency,
-        //    ArmorConstants.HideArmor,
-        //    ArmorConstants.ScaleMail,
-        //    ArmorConstants.Chainmail,
-        //    ArmorConstants.Breastplate,
-        //    ArmorConstants.FullPlateOfSpeed)]
         [TestCase(FeatConstants.TowerShieldProficiency, ArmorConstants.TowerShield)]
         [TestCase(AttributeConstants.Metal,
             ArmorConstants.SplintMail,
@@ -62,12 +40,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
             ArmorConstants.FullPlate,
             ArmorConstants.StuddedLeatherArmor,
             ArmorConstants.ChainShirt,
-            ArmorConstants.ElvenChain,
-            ArmorConstants.CelestialArmor,
             ArmorConstants.ScaleMail,
             ArmorConstants.Chainmail,
             ArmorConstants.Breastplate,
-            ArmorConstants.FullPlateOfSpeed,
             ArmorConstants.HeavySteelShield,
             ArmorConstants.LightSteelShield)]
         public void ItemGroup(string name, params string[] collection)
@@ -78,36 +53,29 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Items
         [Test]
         public void ItemGroup_LightArmorProficiency()
         {
-            var lightArmors = ArmorConstants.GetAllLightArmors(true);
-            AssertDistinctCollection(FeatConstants.LightArmorProficiency, [.. lightArmors]);
+            var lightArmors = ArmorConstants.GetAllLightArmors(false).ToArray();
+            AssertDistinctCollection(FeatConstants.LightArmorProficiency, lightArmors);
         }
 
         [Test]
         public void ItemGroup_MediumArmorProficiency()
         {
-            var mediumArmors = ArmorConstants.GetAllMediumArmors(true);
-            AssertDistinctCollection(FeatConstants.MediumArmorProficiency, [.. mediumArmors]);
+            var mediumArmors = ArmorConstants.GetAllMediumArmors(false).ToArray();
+            AssertDistinctCollection(FeatConstants.MediumArmorProficiency, mediumArmors);
         }
 
         [Test]
         public void ItemGroup_HeavyArmorProficiency()
         {
-            var heavyArmors = ArmorConstants.GetAllHeavyArmors(true);
-            AssertDistinctCollection(FeatConstants.HeavyArmorProficiency, [.. heavyArmors]);
+            var heavyArmors = ArmorConstants.GetAllHeavyArmors(false).ToArray();
+            AssertDistinctCollection(FeatConstants.HeavyArmorProficiency, heavyArmors);
         }
 
         [Test]
         public void ItemGroup_ShieldProficiency()
         {
-            var shields = ArmorConstants.GetAllShields(true).Except([ArmorConstants.TowerShield]);
-            AssertDistinctCollection(FeatConstants.ShieldProficiency, [.. shields]);
-        }
-
-        [Test]
-        public void ItemGroup_Specific_ContainsAllSpecificArmors()
-        {
-            var armors = ArmorConstants.GetAllSpecificArmorsAndShields();
-            AssertDistinctCollection(AttributeConstants.Specific, [.. armors]);
+            var shields = ArmorConstants.GetAllShields(false).Except([ArmorConstants.TowerShield]).ToArray();
+            AssertDistinctCollection(FeatConstants.ShieldProficiency, shields);
         }
 
         [Test]

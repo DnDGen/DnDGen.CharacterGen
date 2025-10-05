@@ -14,8 +14,6 @@
     <entry>Leather armor</entry>
     <entry>Studded leather armor</entry>
     <entry>Chain shirt</entry>
-    <entry>Elven Chain</entry>
-    <entry>Celestial Armor</entry>
   </collection>
   <collection>
     <name>Medium Armor Proficiency</name>
@@ -23,7 +21,6 @@
     <entry>Scale mail</entry>
     <entry>Chainmail</entry>
     <entry>Breastplate</entry>
-    <entry>Full Plate of Speed</entry>
   </collection>
   <collection>
     <name>Shield Proficiency</name>
@@ -45,20 +42,11 @@
 		<entry>Full plate</entry>
 		<entry>Studded leather armor</entry>
 		<entry>Chain shirt</entry>
-		<entry>Elven Chain</entry>
-		<entry>Celestial Armor</entry>
 		<entry>Scale mail</entry>
 		<entry>Chainmail</entry>
 		<entry>Breastplate</entry>
-		<entry>Full Plate of Speed</entry>
 		<entry>Heavy steel shield</entry>
 		<entry>Light steel shield</entry>
-	</collection>
-	<collection>
-		<name>Specific</name>
-		<entry>Celestial Armor</entry>
-		<entry>Elven Chain</entry>
-		<entry>Full Plate of Speed</entry>
 	</collection>
 	<collection>
 		<name>Ammunition</name>
