@@ -3,7 +3,7 @@ using DnDGen.CharacterGen.Abilities.Randomizers;
 using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
 using DnDGen.CharacterGen.CharacterClasses.Randomizers.Levels;
 using DnDGen.CharacterGen.Leaders;
-using DnDGen.CharacterGen.Tests.Integration.Generators.Characters;
+using DnDGen.CharacterGen.Tests.Integration.Characters;
 using NUnit.Framework;
 using System;
 

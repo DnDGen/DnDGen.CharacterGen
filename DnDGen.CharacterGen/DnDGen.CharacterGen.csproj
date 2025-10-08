@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>15.0.1</Version>
+    <Version>16.0.0</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
     <Product>CharacterGen</Product>
     <Description>This generates characters and NPCs for the Dungeons and Dragons 3.5 system. One can generate random characters or set various randomizers.</Description>
-    <PackageReleaseNotes>Add code coverage to build. Adjust equipment rates</PackageReleaseNotes>
+    <PackageReleaseNotes>Add code coverage to build. Adjust equipment rates. Reorganize code.</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/DnDGen/CharacterGen</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DnDGen/CharacterGen</RepositoryUrl>
     <PackageTags>character npc generator dice dungeons dragons d20 dnd 3.5 gen</PackageTags>

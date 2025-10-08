@@ -93,14 +93,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             proficientArmors[FeatConstants.LightArmorProficiency].Add("my armor");
             proficientArmors[FeatConstants.LightArmorProficiency].Add("other armor");
             proficientArmors[FeatConstants.LightArmorProficiency].Add("metal armor");
-            proficientArmors[FeatConstants.LightArmorProficiency].Add("specific armor");
-            proficientArmors[FeatConstants.LightArmorProficiency].Add("specific metal armor");
             proficientShields.Remove(magicalShield.Name);
             proficientShields[FeatConstants.ShieldProficiency].Add("my shield");
             proficientShields[FeatConstants.ShieldProficiency].Add("other shield");
             proficientShields[FeatConstants.ShieldProficiency].Add("metal shield");
-            proficientShields[FeatConstants.ShieldProficiency].Add("specific shield");
-            proficientShields[FeatConstants.ShieldProficiency].Add("specific metal shield");
 
             characterClass.Level = 9266;
             additionalFeats.Add(new Feat { Name = FeatConstants.LightArmorProficiency });
@@ -159,21 +155,14 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             }
 
             mockCollectionsSelector
-                .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Specific))
-                .Returns(() => new[] { magicalArmor.Name, magicalShield.Name }
-                    .Union(proficientArmors.Values.SelectMany(a => a))
-                    .Union(proficientShields.Values.SelectMany(a => a))
-                    .Where(a => a.Contains("specific")));
-            mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.ItemGroups, AttributeConstants.Metal))
                 .Returns(() => new[] { magicalArmor.Name, magicalShield.Name }
                     .Union(proficientArmors.Values.SelectMany(a => a))
                     .Union(proficientShields.Values.SelectMany(a => a))
                     .Where(a => a.Contains("metal")));
 
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.IsAny<double>())).Returns(false);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.IsAny<int>())).Returns(false);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(It.IsAny<int>())).Returns(false);
+            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(false);
+            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(false);
         }
 
         [Test]
@@ -425,17 +414,31 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateArmorFrom_GenerateMundaneArmor_NoDruidYesSpecificYesRerollNoDragonhide_MundaneCannotBeSpecific()
+        public void GenerateArmorFrom_GenerateMundaneArmor_NoDruidNoDragonhide_ReturnsMetalArmor()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var mundaneArmor = CreateArmor("mundane armor", FeatConstants.LightArmorProficiency);
 
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<double>(t => t <= 1))).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<int>(t => t <= 100))).Returns(true);
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor", "mundane armor"], "metal armor");
+            mockMundaneArmorGenerator.Setup(g => g.Generate("metal armor", race.Size)).Returns(mundaneArmor);
 
-            SetupSelectRandomArmor(["my armor", "other armor", "metal armor", "mundane armor"], "my random armor");
-            mockMundaneArmorGenerator.Setup(g => g.Generate("my random armor", race.Size)).Returns(mundaneArmor);
+            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
+            Assert.That(armor, Is.EqualTo(mundaneArmor));
+        }
+
+        [Test]
+        public void GenerateArmorFrom_GenerateMundaneArmor_NoDruidYesDragonhide_ReturnsMetalArmor()
+        {
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
+
+            var mundaneArmor = CreateArmor("mundane armor", FeatConstants.LightArmorProficiency);
+
+            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
+            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
+
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor", "mundane armor"], "metal armor");
+            mockMundaneArmorGenerator.Setup(g => g.Generate("metal armor", race.Size)).Returns(mundaneArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(mundaneArmor));
@@ -444,7 +447,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [TestCase(false, false)]
         [TestCase(false, true)]
         [TestCase(true, false)]
-        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidNoSpecific0RerollNoDragonhide_ByRoll_ReturnNonmetalArmor(bool specialMaterial, bool dragonhide)
+        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidNoDragonhide_ByRoll_ReturnNonmetalArmor(bool specialMaterial, bool dragonhide)
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
@@ -463,7 +466,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidNoSpecific0RerollYesDragonhide_ReturnsDragonhideArmor()
+        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidYesDragonhide_ReturnsDragonhideArmor()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
@@ -482,7 +485,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidNoSpecific0RerollYesDragonhide_ReturnsNonmetalArmor()
+        public void GenerateArmorFrom_GenerateMundaneArmor_YesDruidYesDragonhide_ReturnsNonmetalArmor()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
@@ -581,110 +584,33 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             Assert.That(armor, Is.EqualTo(expectedArmor));
         }
 
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidNoSpecific0RerollNoDragonhide(string power, double specificThreshold)
+        [Test]
+        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidNoDragonhide_ReturnMetalArmor()
         {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "my metal armor");
+            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my metal armor", race.Size)).Returns(magicalArmor);
 
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false);
+            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
+            Assert.That(armor, Is.EqualTo(magicalArmor));
+        }
+        [Test]
+        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidYesDragonhide_ReturnMetalArmor()
+        {
+            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
+            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
+            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "my metal armor");
+            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my metal armor", race.Size)).Returns(magicalArmor);
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(magicalArmor));
         }
 
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidYesSpecific0RerollNoDragonhide(string power, double specificThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            SetupSelectRandomArmor(["specific armor", "specific metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidNoSpecific1RerollNoDragonhide(string power, double specificThreshold, int rerollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rerollThreshold)).Returns(true).Returns(false);
-
-            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidYesSpecific1RerollNoDragonhide(string power, double specificThreshold, int rerollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(rerollThreshold)).Returns(true);
-
-            SetupSelectRandomArmor(["specific armor", "specific metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidNoSpecific2RerollNoDragonhide(string power, double specificThreshold, int rerollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rerollThreshold)).Returns(true).Returns(true).Returns(false);
-
-            SetupSelectRandomArmor(["my armor", "other armor", "metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_NoDruidYesSpecific2RerollNoDragonhide(string power, double specificThreshold, int rerollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(false).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(rerollThreshold)).Returns(true);
-
-            SetupSelectRandomArmor(["specific armor", "specific metal armor"], "my random armor");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random armor", race.Size)).Returns(magicalArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
 
         [TestCase(false, false)]
         [TestCase(false, true)]
         [TestCase(true, false)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidNoSpecific0RerollNoDragonhide_ByRoll_ReturnNonmetalArmor(bool specialMaterial, bool dragonhide)
+        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidNoDragonhide_ByRoll_ReturnNonmetalArmor(bool specialMaterial, bool dragonhide)
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -699,7 +625,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidNoSpecific0RerollYesDragonhide_ReturnsDragonhideArmor()
+        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidYesDragonhide_ReturnsDragonhideArmor()
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -714,7 +640,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidNoSpecific0RerollYesDragonhide_ReturnsNonmetalArmor()
+        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidYesDragonhide_ReturnsNonmetalArmor()
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -726,131 +652,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
             Assert.That(armor, Is.EqualTo(magicalArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, false, false)]
-        [TestCase(PowerConstants.Minor, 0.98, false, true)]
-        [TestCase(PowerConstants.Minor, 0.98, true, false)]
-        [TestCase(PowerConstants.Medium, 0.97, false, false)]
-        [TestCase(PowerConstants.Medium, 0.97, false, true)]
-        [TestCase(PowerConstants.Medium, 0.97, true, false)]
-        [TestCase(PowerConstants.Major, 0.97, false, false)]
-        [TestCase(PowerConstants.Major, 0.97, false, true)]
-        [TestCase(PowerConstants.Major, 0.97, true, false)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidYesSpecific0RerollNoDragonhide_OnlyGetNonMetalSpecific(
-            string power,
-            double specificThreshold,
-            bool specialMaterial,
-            bool dragonhide)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
-
-            additionalFeats.Clear();
-            additionalFeats.Add(new Feat { Name = FeatConstants.HeavyArmorProficiency });
-            classFeats.Add(new Feat { Name = FeatConstants.MediumArmorProficiency });
-            classFeats.Add(new Feat { Name = FeatConstants.LightArmorProficiency });
-
-            proficientArmors[FeatConstants.HeavyArmorProficiency].Clear();
-            proficientArmors[FeatConstants.HeavyArmorProficiency].AddRange(
-                ["heavy metal armor", "other heavy metal armor", "specific heavy metal armor", "other specific heavy metal armor"]);
-            proficientArmors[FeatConstants.MediumArmorProficiency].Clear();
-            proficientArmors[FeatConstants.MediumArmorProficiency].AddRange(
-                ["medium metal armor", "other medium metal armor", "specific medium metal armor", "other specific medium metal armor",
-                    "medium armor", "other medium armor", "specific medium armor", "other specific medium armor"]);
-            proficientArmors[FeatConstants.LightArmorProficiency].Clear();
-            proficientArmors[FeatConstants.LightArmorProficiency].AddRange(
-                ["light metal armor", "other light metal armor", "specific light metal armor", "other specific light metal armor",
-                    "light armor", "other light armor"]);
-
-            //Class
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.MediumArmorProficiency),
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    null))
-                .Returns(FeatConstants.MediumArmorProficiency);
-
-            //Armors
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    RandomWeightedCollection<string>.EquivalentSet("specific medium armor", "other specific medium armor"),
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    null))
-                .Returns("other specific medium armor");
-
-            var specificArmor = CreateArmor("other specific medium armor");
-            mockMagicalArmorGenerator
-                .Setup(g => g.Generate(power, "other specific medium armor", race.Size))
-                .Returns(specificArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(specificArmor));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateArmorFrom_GenerateMagicalArmor_YesDruidYesSpecific0RerollYesDragonhide_OnlyGetNonMetalSpecific(string power, double specificThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
-
-            additionalFeats.Clear();
-            additionalFeats.Add(new Feat { Name = FeatConstants.HeavyArmorProficiency });
-            classFeats.Add(new Feat { Name = FeatConstants.MediumArmorProficiency });
-            classFeats.Add(new Feat { Name = FeatConstants.LightArmorProficiency });
-
-            proficientArmors[FeatConstants.HeavyArmorProficiency].Clear();
-            proficientArmors[FeatConstants.HeavyArmorProficiency].AddRange(
-                ["heavy metal armor", "other heavy metal armor", "specific heavy metal armor", "other specific heavy metal armor"]);
-            proficientArmors[FeatConstants.MediumArmorProficiency].Clear();
-            proficientArmors[FeatConstants.MediumArmorProficiency].AddRange(
-                ["medium metal armor", "other medium metal armor", "specific medium metal armor", "other specific medium metal armor",
-                    "medium armor", "other medium armor", "specific medium armor", "other specific medium armor"]);
-            proficientArmors[FeatConstants.LightArmorProficiency].Clear();
-            proficientArmors[FeatConstants.LightArmorProficiency].AddRange(
-                ["light metal armor", "other light metal armor", "specific light metal armor", "other specific light metal armor",
-                    "light armor", "other light armor"]);
-
-            //Class
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.MediumArmorProficiency),
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    null))
-                .Returns(FeatConstants.MediumArmorProficiency);
-
-            //Armors
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    RandomWeightedCollection<string>.EquivalentSet("specific medium armor", "other specific medium armor"),
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    null))
-                .Returns("other specific medium armor");
-
-            var specificArmor = CreateArmor("other specific medium armor");
-            mockMagicalArmorGenerator
-                .Setup(g => g.Generate(power, "other specific medium armor", race.Size))
-                .Returns(specificArmor);
-
-            var armor = armorGenerator.GenerateArmorFrom(feats, characterClass, race);
-            Assert.That(armor, Is.EqualTo(specificArmor));
         }
 
         [Test]
@@ -1060,17 +861,31 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateShieldFrom_GenerateMundaneShield_NoDruidYesSpecificYesRerollNoDragonhide_CannotBeSpecific()
+        public void GenerateShieldFrom_GenerateMundaneShield_NoDruidNoDragonhide_ReturnMetalShield()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
             var mundaneShield = CreateShield("mundane shield", FeatConstants.ShieldProficiency);
 
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<double>(t => t <= 1))).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(It.Is<int>(t => t <= 100))).Returns(true);
+            SetupSelectRandomArmor(["my shield", "other shield", "metal shield", "mundane shield"], "my metal shield");
+            mockMundaneArmorGenerator.Setup(g => g.Generate("my metal shield", race.Size)).Returns(mundaneShield);
 
-            SetupSelectRandomArmor(["my shield", "other shield", "metal shield", "mundane shield"], "my random shield");
-            mockMundaneArmorGenerator.Setup(g => g.Generate("my random shield", race.Size)).Returns(mundaneShield);
+            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
+            Assert.That(shield, Is.EqualTo(mundaneShield));
+        }
+
+        [Test]
+        public void GenerateShieldFrom_GenerateMundaneShield_NoDruidYesDragonhide_ReturnMetalShield()
+        {
+            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
+
+            var mundaneShield = CreateShield("mundane shield", FeatConstants.ShieldProficiency);
+
+            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
+            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
+
+            SetupSelectRandomArmor(["my shield", "other shield", "metal shield", "mundane shield"], "my metal shield");
+            mockMundaneArmorGenerator.Setup(g => g.Generate("my metal shield", race.Size)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.EqualTo(mundaneShield));
@@ -1079,7 +894,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [TestCase(false, false)]
         [TestCase(false, true)]
         [TestCase(true, false)]
-        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidNoSpecific0RerollNoDragonhide_ByRoll(bool specialMaterial, bool dragonhide)
+        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidNoDragonhide_ByRoll(bool specialMaterial, bool dragonhide)
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
@@ -1098,26 +913,26 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidNoSpecific0RerollYesDragonhide_ReturnsDragonhideShield()
+        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidYesDragonhide_ReturnsDragonhideShield()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
-            var mundaneShield = CreateShield("metal shield", FeatConstants.ShieldProficiency);
+            var mundaneShield = CreateShield("my metal shield", FeatConstants.ShieldProficiency);
 
             characterClass.Name = CharacterClassConstants.Druid;
 
             mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
             mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            SetupSelectRandomArmor(["my shield", "other shield", "metal shield"], "metal shield");
-            mockMundaneArmorGenerator.Setup(g => g.Generate("metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(mundaneShield);
+            SetupSelectRandomArmor(["my shield", "other shield", "metal shield", "my metal shield"], "my metal shield");
+            mockMundaneArmorGenerator.Setup(g => g.Generate("my metal shield", race.Size, TraitConstants.SpecialMaterials.Dragonhide)).Returns(mundaneShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.EqualTo(mundaneShield));
         }
 
         [Test]
-        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidNoSpecific0RerollYesDragonhide_ReturnsNonmetalShield()
+        public void GenerateShieldFrom_GenerateMundaneShield_YesDruidYesDragonhide_ReturnsNonmetalShield()
         {
             mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(PowerConstants.Mundane);
 
@@ -1201,79 +1016,24 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
             Assert.That(shield, Is.EqualTo(expectedShield));
         }
 
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidYesSpecific0RerollNoDragonhide(string power, double specificThreshold)
+        [Test]
+        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidNoDragonhide_ReturnMetalShield()
         {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            SetupSelectRandomArmor(["specific shield", "specific metal shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
+            SetupSelectRandomArmor(["my shield", "other shield", "metal shield"], "my metal shield");
+            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my metal shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.EqualTo(magicalShield));
         }
 
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidYesSpecific0RerollNoDragonhide_OnlySpecific(string power, double specificThreshold)
+        [Test]
+        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidYesDragonhide_ReturnMetalShield()
         {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
+            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
+            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
 
-            // INFO: There are no specific tower shields, so test that it doesn't show up as an option when shield should be specific
-            additionalFeats.Add(new Feat { Name = FeatConstants.TowerShieldProficiency });
-            proficientShields[FeatConstants.TowerShieldProficiency].AddRange(RandomShieldPermutation.TowerShields);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            mockCollectionsSelector
-                .Setup(s => s.SelectRandomFrom(
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    RandomWeightedCollection<string>.EquivalentSet(FeatConstants.ShieldProficiency),
-                    RandomWeightedCollection<string>.EquivalentSet(),
-                    null))
-                .Returns(FeatConstants.ShieldProficiency);
-
-            SetupSelectRandomArmor(["specific shield", "specific metal shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidYesSpecific1RerollNoDragonhide(string power, double specificThreshold, int rollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(true);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true).Returns(false);
-
-            SetupSelectRandomArmor(["specific shield", "specific metal shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92)]
-        [TestCase(PowerConstants.Medium, 0.97, 64)]
-        [TestCase(PowerConstants.Major, 0.97, 64)]
-        public void GenerateShieldFrom_GenerateMagicalShield_NoDruidYesSpecific2RerollNoDragonhide(string power, double specificThreshold, int rollThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(false).Returns(true);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true).Returns(true).Returns(false);
-
-            SetupSelectRandomArmor(["specific shield", "specific metal shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
+            SetupSelectRandomArmor(["my shield", "other shield", "metal shield"], "my metal shield");
+            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my metal shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.EqualTo(magicalShield));
@@ -1282,7 +1042,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         [TestCase(false, false)]
         [TestCase(false, true)]
         [TestCase(true, false)]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidNoSpecific0RerollNoDragonhide_ByRoll(bool specialMaterial, bool dragonhide)
+        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidNoDragonhide_ByRoll(bool specialMaterial, bool dragonhide)
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -1297,7 +1057,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidNoSpecific0RerollYesDragonhide_ReturnsDragonhideShield()
+        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesDragonhide_ReturnsDragonhideShield()
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -1312,7 +1072,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
         }
 
         [Test]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidNoSpecific0RerollYesDragonhide_ReturnsNonmetalShield()
+        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesDragonhide_ReturnsNonmetalShield()
         {
             characterClass.Name = CharacterClassConstants.Druid;
 
@@ -1321,125 +1081,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
 
             SetupSelectRandomArmor(["my shield", "other shield", "metal shield"], "other shield");
             mockMagicalArmorGenerator.Setup(g => g.Generate(power, "other shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, false, false)]
-        [TestCase(PowerConstants.Minor, 0.98, false, true)]
-        [TestCase(PowerConstants.Minor, 0.98, true, false)]
-        [TestCase(PowerConstants.Medium, 0.97, false, false)]
-        [TestCase(PowerConstants.Medium, 0.97, false, true)]
-        [TestCase(PowerConstants.Medium, 0.97, true, false)]
-        [TestCase(PowerConstants.Major, 0.97, false, false)]
-        [TestCase(PowerConstants.Major, 0.97, false, true)]
-        [TestCase(PowerConstants.Major, 0.97, true, false)]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesSpecific0RerollNoDragonhide_ByRoll(
-            string power,
-            double specificThreshold,
-            bool specialMaterial,
-            bool dragonhide)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
-
-            SetupSelectRandomArmor(["specific shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92, false, false)]
-        [TestCase(PowerConstants.Minor, 0.98, 92, false, true)]
-        [TestCase(PowerConstants.Minor, 0.98, 92, true, false)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, false, false)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, false, true)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, true, false)]
-        [TestCase(PowerConstants.Major, 0.97, 64, false, false)]
-        [TestCase(PowerConstants.Major, 0.97, 64, false, true)]
-        [TestCase(PowerConstants.Major, 0.97, 64, true, false)]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesSpecific1RerollNoDragonhide_ByRoll(
-            string power,
-            double specificThreshold,
-            int rollThreshold,
-            bool specialMaterial,
-            bool dragonhide)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(true);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true).Returns(false);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
-
-            SetupSelectRandomArmor(["specific shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98, 92, false, false)]
-        [TestCase(PowerConstants.Minor, 0.98, 92, false, true)]
-        [TestCase(PowerConstants.Minor, 0.98, 92, true, false)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, false, false)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, false, true)]
-        [TestCase(PowerConstants.Medium, 0.97, 64, true, false)]
-        [TestCase(PowerConstants.Major, 0.97, 64, false, false)]
-        [TestCase(PowerConstants.Major, 0.97, 64, false, true)]
-        [TestCase(PowerConstants.Major, 0.97, 64, true, false)]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesSpecific2RerollNoDragonhide_ByRoll(
-            string power,
-            double specificThreshold,
-            int rollThreshold,
-            bool specialMaterial,
-            bool dragonhide)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(false).Returns(false).Returns(true);
-            mockDice.SetupSequence(d => d.Roll(1).d(100).AsTrueOrFalse(rollThreshold)).Returns(true).Returns(true).Returns(false);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(specialMaterial);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(dragonhide);
-
-            SetupSelectRandomArmor(["specific shield"], "my random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "my random shield", race.Size)).Returns(magicalShield);
-
-            var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
-            Assert.That(shield, Is.EqualTo(magicalShield));
-        }
-
-        [TestCase(PowerConstants.Minor, 0.98)]
-        [TestCase(PowerConstants.Medium, 0.97)]
-        [TestCase(PowerConstants.Major, 0.97)]
-        public void GenerateShieldFrom_GenerateMagicalShield_YesDruidYesSpecific0RerollYesDragonhide_ReturnsNonmetalSpecific(string power, double specificThreshold)
-        {
-            mockTreasureLevelSelector.Setup(s => s.SelectPowerFrom(characterClass, race)).Returns(power);
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(specificThreshold)).Returns(true);
-
-            characterClass.Name = CharacterClassConstants.Druid;
-
-            mockDice.Setup(d => d.Roll(1).d(100).AsTrueOrFalse(.95)).Returns(true);
-            mockDice.Setup(d => d.Roll(1).d(3).AsTrueOrFalse(3)).Returns(true);
-
-            //Can't apply Dragonhide to specific armor
-            SetupSelectRandomArmor(["specific shield"], "specific random shield");
-            mockMagicalArmorGenerator.Setup(g => g.Generate(power, "specific random shield", race.Size)).Returns(magicalShield);
 
             var shield = armorGenerator.GenerateShieldFrom(feats, characterClass, race);
             Assert.That(shield, Is.EqualTo(magicalShield));

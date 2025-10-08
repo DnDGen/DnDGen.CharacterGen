@@ -133,14 +133,18 @@ namespace DnDGen.CharacterGen.Tests.Unit.Items
                 return all.ElementAt(index++ % total);
             }
 
+            var proficinecyFeats = new[] {
+                FeatConstants.SimpleWeaponProficiency,
+                FeatConstants.MartialWeaponProficiency,
+                FeatConstants.ExoticWeaponProficiency,
+            };
             mockMagicalWeaponGenerator.Setup(g => g.Generate(power, "my random weapon", race.Size)).Returns(magicalWeapon);
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatGroups, ItemTypeConstants.Weapon + GroupConstants.Proficiency))
-                .Returns([
-                    FeatConstants.SimpleWeaponProficiency,
-                    FeatConstants.MartialWeaponProficiency,
-                    FeatConstants.ExoticWeaponProficiency,
-                ]);
+                .Returns(proficinecyFeats);
+            mockCollectionsSelector
+                .Setup(s => s.IsCollection(Config.Name, TableNameConstants.Set.Collection.FeatFoci, It.IsAny<string>()))
+                .Returns((string _, string _, string f) => proficinecyFeats.Contains(f));
             mockCollectionsSelector
                 .Setup(s => s.SelectFrom(Config.Name, TableNameConstants.Set.Collection.FeatFoci, additionalFeats[0].Name))
                 .Returns(allProficientWeapons);

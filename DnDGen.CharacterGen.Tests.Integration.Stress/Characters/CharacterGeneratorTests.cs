@@ -2,7 +2,7 @@
 using DnDGen.CharacterGen.CharacterClasses.Randomizers.ClassNames;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Races.Randomizers;
-using DnDGen.CharacterGen.Tests.Integration.Generators.Characters;
+using DnDGen.CharacterGen.Tests.Integration.Characters;
 using NUnit.Framework;
 
 namespace DnDGen.CharacterGen.Tests.Integration.Stress.Characters
