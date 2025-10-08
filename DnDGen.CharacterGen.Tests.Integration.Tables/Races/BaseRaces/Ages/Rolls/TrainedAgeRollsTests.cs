@@ -93,7 +93,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Ages.Roll
         [TestCase(RaceConstants.BaseRaces.YuanTiPureblood, "2d6")]
         public void TrainedAgeRoll(string name, string ageRoll)
         {
-            DistinctCollection(name, ageRoll);
+            AssertDistinctCollection(name, ageRoll);
         }
     }
 }

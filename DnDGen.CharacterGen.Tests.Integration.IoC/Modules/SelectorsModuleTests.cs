@@ -1,5 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities.Selectors;
 using DnDGen.CharacterGen.Feats.Selectors;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Languages.Selectors;
 using DnDGen.CharacterGen.Leaders.Selectors;
 using DnDGen.CharacterGen.Selectors;
@@ -45,6 +46,12 @@ namespace DnDGen.CharacterGen.Tests.Integration.IoC.Modules
         public void LeadershipSelectorsAreNotGeneratedAsSingletons()
         {
             AssertNotSingleton<ILeadershipSelector>();
+        }
+
+        [Test]
+        public void TreasureLevelSelectorsAreNotGeneratedAsSingletons()
+        {
+            AssertNotSingleton<ITreasureLevelSelector>();
         }
     }
 }

@@ -113,7 +113,8 @@
                 public const string GOODNESSCharacterClasses = "{0}CharacterClasses";
                 public const string GOODNESSCLASSBaseRaces = "{0}{1}BaseRaces";
                 public const string GOODNESSCLASSMetaraces = "{0}{1}Metaraces";
-                public const string LevelXPower = "Level{0}Power";
+
+                public static string LevelXPower(int level) => $"Level{level}Power";
             }
 
             internal static class TrueOrFalse

@@ -80,7 +80,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
             collection[DataIndexConstants.SkillSelectionData.SkillName] = skillName;
             collection[DataIndexConstants.SkillSelectionData.Focus] = string.Empty;
 
-            base.OrderedCollection(name, collection);
+            base.AssertOrderedCollection(name, collection);
         }
 
         [TestCase(SkillConstants.Craft, AbilityConstants.Intelligence, SkillConstants.Foci.Craft.Alchemy)]
@@ -236,7 +236,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
             collection[DataIndexConstants.SkillSelectionData.SkillName] = skillName;
             collection[DataIndexConstants.SkillSelectionData.Focus] = focus;
 
-            base.OrderedCollection(name, collection);
+            base.AssertOrderedCollection(name, collection);
         }
     }
 }

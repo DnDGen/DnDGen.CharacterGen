@@ -144,7 +144,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
             FeatConstants.Telekinesis)]
         public void FeatFoci(string feat, params string[] foci)
         {
-            base.DistinctCollection(feat, foci);
+            base.AssertDistinctCollection(feat, foci);
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 "Vermin"
             };
 
-            base.DistinctCollection(GroupConstants.FavoredEnemies, foci);
+            base.AssertDistinctCollection(GroupConstants.FavoredEnemies, foci);
         }
 
         [Test]
@@ -199,7 +199,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 WeaponConstants.SlingBullet,
             }).ToArray();
 
-            base.DistinctCollection(FeatConstants.Foci.Weapons, allWeapons);
+            base.AssertDistinctCollection(FeatConstants.Foci.Weapons, allWeapons);
         }
 
         [Test]
@@ -212,7 +212,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 FeatConstants.Foci.UnarmedStrike
             }.Union(weapons).ToArray();
 
-            base.DistinctCollection(FeatConstants.Foci.WeaponsWithUnarmed, foci);
+            base.AssertDistinctCollection(FeatConstants.Foci.WeaponsWithUnarmed, foci);
         }
 
         [Test]
@@ -226,7 +226,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 FeatConstants.Foci.Grapple,
             }.Union(weapons).ToArray();
 
-            base.DistinctCollection(FeatConstants.Foci.WeaponsWithUnarmedAndGrapple, foci);
+            base.AssertDistinctCollection(FeatConstants.Foci.WeaponsWithUnarmedAndGrapple, foci);
         }
 
         [Test]
@@ -241,7 +241,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 FeatConstants.Foci.Ray,
             }.Union(weapons).ToArray();
 
-            base.DistinctCollection(FeatConstants.Foci.WeaponsWithUnarmedAndGrappleAndRay, foci);
+            base.AssertDistinctCollection(FeatConstants.Foci.WeaponsWithUnarmedAndGrappleAndRay, foci);
         }
 
         [Test]
@@ -425,7 +425,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Feats
                 SkillConstants.UseRope
             };
 
-            base.DistinctCollection(GroupConstants.Skills, foci);
+            base.AssertDistinctCollection(GroupConstants.Skills, foci);
         }
     }
 }

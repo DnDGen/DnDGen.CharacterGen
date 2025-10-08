@@ -105,7 +105,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
             RaceConstants.Metaraces.HalfCelestial)]
         public void MetaraceGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
                 RaceConstants.Metaraces.Werebear,
             };
 
-            base.DistinctCollection(CharacterClassConstants.Paladin, metaraces);
+            base.AssertDistinctCollection(CharacterClassConstants.Paladin, metaraces);
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
                 RaceConstants.Metaraces.Werewolf_Dire,
             };
 
-            base.DistinctCollection(GroupConstants.All, metaraces);
+            base.AssertDistinctCollection(GroupConstants.All, metaraces);
         }
 
         [TestCase(CharacterClassConstants.Adept)]
@@ -174,7 +174,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
                 RaceConstants.Metaraces.Werewolf_Dire,
             };
 
-            base.DistinctCollection(className, metaraces);
+            base.AssertDistinctCollection(className, metaraces);
         }
 
         [TestCase(CharacterClassConstants.Aristocrat)]
@@ -204,7 +204,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
                 RaceConstants.Metaraces.Werewolf_Dire,
             };
 
-            base.DistinctCollection(className, metaraces);
+            base.AssertDistinctCollection(className, metaraces);
         }
 
         [Test]

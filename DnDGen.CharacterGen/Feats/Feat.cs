@@ -11,18 +11,31 @@ namespace DnDGen.CharacterGen.Feats
         public Frequency Frequency { get; set; }
         public bool CanBeTakenMultipleTimes { get; set; }
 
+        public string Summary
+        {
+            get
+            {
+                if (!Foci.Any())
+                    return Name;
+
+                return $"{Name} ({string.Join(", ", Foci)})";
+            }
+        }
+
         public Feat()
         {
             Name = string.Empty;
-            Foci = Enumerable.Empty<string>();
+            Foci = [];
             Frequency = new Frequency();
         }
 
         public Feat Clone()
         {
-            var clone = new Feat();
-            clone.CanBeTakenMultipleTimes = CanBeTakenMultipleTimes;
-            clone.Foci = Foci.ToArray();
+            var clone = new Feat
+            {
+                CanBeTakenMultipleTimes = CanBeTakenMultipleTimes,
+                Foci = [.. Foci]
+            };
             clone.Frequency.Quantity = Frequency.Quantity;
             clone.Frequency.TimePeriod = Frequency.TimePeriod;
             clone.Name = Name;
@@ -30,5 +43,7 @@ namespace DnDGen.CharacterGen.Feats
 
             return clone;
         }
+
+        public override string ToString() => Summary;
     }
 }

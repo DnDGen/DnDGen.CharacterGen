@@ -197,9 +197,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics.Spells.Known.Druid
             SpellConstants.StormOfVengeance,
             SpellConstants.SummonNaturesAllyIX,
             SpellConstants.Sympathy)]
-        public override void Collection(string name, params string[] collection)
+        public override void AssertCollection(string name, params string[] collection)
         {
-            base.Collection(name, collection);
+            base.AssertCollection(name, collection);
         }
     }
 }

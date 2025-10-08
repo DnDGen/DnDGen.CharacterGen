@@ -100,7 +100,7 @@ namespace DnDGen.CharacterGen.Characters
 
             var baseAttack = combatGenerator.GenerateBaseAttackWith(character.Class, character.Race, character.Abilities);
             character.Feats = featsGenerator.GenerateWith(character.Class, character.Race, character.Abilities, character.Skills, baseAttack);
-            character.Equipment = equipmentGenerator.GenerateWith(character.Feats.All, character.Class, character.Race);
+            character.Equipment = equipmentGenerator.GenerateWith(character.Feats, character.Class, character.Race);
             character.Skills = skillsGenerator.UpdateSkillsFromFeats(character.Skills, character.Feats.All);
             character.Skills = skillsGenerator.UpdateSkillsFromEquipment(character.Skills, character.Equipment);
 

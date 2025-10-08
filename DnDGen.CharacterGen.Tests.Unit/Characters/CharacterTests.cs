@@ -87,6 +87,32 @@ namespace DnDGen.CharacterGen.Tests.Unit.Characters
         }
 
         [Test]
+        public void CharacterToString()
+        {
+            character.Alignment.Goodness = "goodness";
+            character.Alignment.Lawfulness = "lawfulness";
+            character.Class.Level = 9266;
+            character.Class.Name = "class name";
+            character.Race.BaseRace = "base race";
+
+            Assert.That(character.ToString(), Is.EqualTo("lawfulness goodness Female base race Level 9266 class name"));
+        }
+
+        [Test]
+        public void CharacterToStringWithMetarace()
+        {
+            character.Alignment.Goodness = "goodness";
+            character.Alignment.Lawfulness = "lawfulness";
+            character.Class.Level = 9266;
+            character.Class.Name = "class name";
+            character.Race.BaseRace = "base race";
+            character.Race.Metarace = "metarace";
+            character.Race.IsMale = true;
+
+            Assert.That(character.ToString(), Is.EqualTo("lawfulness goodness Male metarace base race Level 9266 class name"));
+        }
+
+        [Test]
         public void ChallengeRatingForCharacterIsClassLevel()
         {
             character.Class.Level = 9266;

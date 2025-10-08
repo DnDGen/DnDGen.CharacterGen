@@ -146,7 +146,7 @@ namespace DnDGen.CharacterGen.Tests.Unit.CharacterClasses
             Assert.That(characterClass.Level, Is.EqualTo(9266));
             Assert.That(characterClass.LevelAdjustment, Is.EqualTo(2));
             Assert.That(characterClass.IsNPC, Is.True);
-            Assert.That(characterClass.EffectiveLevel, Is.EqualTo(9268 / 2));
+            Assert.That(characterClass.EffectiveLevel, Is.EqualTo(9268));
         }
 
         [Test]

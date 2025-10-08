@@ -94,7 +94,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.BaseRaces.Heights
         [TestCase(RaceConstants.BaseRaces.YuanTiPureblood, "2d10")]
         public void HeightRoll(string name, string heightRoll)
         {
-            base.DistinctCollection(name, [heightRoll]);
+            base.AssertDistinctCollection(name, [heightRoll]);
         }
     }
 }

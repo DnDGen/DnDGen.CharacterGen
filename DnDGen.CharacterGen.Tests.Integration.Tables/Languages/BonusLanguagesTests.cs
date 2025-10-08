@@ -391,7 +391,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Languages
         [TestCase(CharacterClassConstants.Warrior)]
         public void BonusLanguages(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [TestCase(RaceConstants.BaseRaces.BlueSlaad)]
@@ -429,7 +429,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Languages
                 LanguageConstants.Undercommon,
             };
 
-            base.DistinctCollection(name, generalLanguages);
+            base.AssertDistinctCollection(name, generalLanguages);
         }
     }
 }

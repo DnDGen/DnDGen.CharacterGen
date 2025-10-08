@@ -86,5 +86,7 @@ namespace DnDGen.CharacterGen.Characters
             Equipment = new Equipment();
             Magic = new Magic();
         }
+
+        public override string ToString() => Summary;
     }
 }

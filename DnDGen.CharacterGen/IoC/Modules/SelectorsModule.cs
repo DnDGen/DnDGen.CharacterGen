@@ -1,5 +1,6 @@
 ﻿using DnDGen.CharacterGen.Abilities.Selectors;
 using DnDGen.CharacterGen.Feats.Selectors;
+using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Languages.Selectors;
 using DnDGen.CharacterGen.Leaders.Selectors;
 using DnDGen.CharacterGen.Selectors;
@@ -18,6 +19,7 @@ namespace DnDGen.CharacterGen.IoC.Modules
             Bind<ISkillSelector>().To<SkillSelector>();
             Bind<ILeadershipSelector>().To<LeadershipSelector>();
             Bind<IFeatsSelector>().To<FeatsSelector>();
+            Bind<ITreasureLevelSelector>().To<TreasureLevelSelector>();
         }
     }
 }

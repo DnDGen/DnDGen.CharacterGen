@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace DnDGen.CharacterGen.CharacterClasses
 {
@@ -13,33 +11,17 @@ namespace DnDGen.CharacterGen.CharacterClasses
         public IEnumerable<string> SpecialistFields { get; set; }
         public IEnumerable<string> ProhibitedFields { get; set; }
 
-        public double EffectiveLevel
-        {
-            get
-            {
-                var divisor = IsNPC ? 2d : 1d;
-                var effectiveLevel = (LevelAdjustment + Level) / divisor;
+        public double EffectiveLevel => LevelAdjustment + Level;
 
-                if (effectiveLevel > 1)
-                    return Math.Floor(effectiveLevel);
-
-                return effectiveLevel;
-            }
-        }
-
-        public string Summary
-        {
-            get
-            {
-                return $"Level {Level} {Name}";
-            }
-        }
+        public string Summary => $"Level {Level} {Name}";
 
         public CharacterClass()
         {
             Name = string.Empty;
-            SpecialistFields = Enumerable.Empty<string>();
-            ProhibitedFields = Enumerable.Empty<string>();
+            SpecialistFields = [];
+            ProhibitedFields = [];
         }
+
+        public override string ToString() => Summary;
     }
 }

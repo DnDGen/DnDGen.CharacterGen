@@ -300,7 +300,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.CharacterClasses
             CharacterClassConstants.Adept)]
         public void ClassNameGroup(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
 
         [Test]
@@ -326,7 +326,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.CharacterClasses
                 CharacterClassConstants.Wizard,
             };
 
-            base.DistinctCollection(GroupConstants.All, classes);
+            base.AssertDistinctCollection(GroupConstants.All, classes);
         }
     }
 }

@@ -56,16 +56,16 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
             mockBaseRaceRandomizer = new Mock<RaceRandomizer>();
             mockMetaraceRandomizer = new Mock<RaceRandomizer>();
 
-            alignments = new List<Alignment>();
+            alignments = [];
             characterClass = new CharacterClassPrototype();
-            classNames = new List<string>();
-            levels = new List<int>();
-            baseRaces = new List<string>();
-            metaraces = new List<string>();
-            adjustments = new Dictionary<string, int>();
+            classNames = [];
+            levels = [];
+            baseRaces = [];
+            metaraces = [];
+            adjustments = [];
             alignment = new Alignment();
             race = new RacePrototype();
-            npcs = new List<string>();
+            npcs = [];
 
             alignment.Goodness = Guid.NewGuid().ToString();
             alignment.Lawfulness = Guid.NewGuid().ToString();
@@ -77,10 +77,10 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
             mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.IsAny<CharacterClassPrototype>())).Returns(metaraces);
 
             mockSetLevelRandomizer.SetupAllProperties();
-            mockSetLevelRandomizer.Setup(r => r.GetAllPossibleResults()).Returns(() => new[] { mockSetLevelRandomizer.Object.SetLevel });
+            mockSetLevelRandomizer.Setup(r => r.GetAllPossibleResults()).Returns(() => [mockSetLevelRandomizer.Object.SetLevel]);
 
             mockSetClassNameRandomizer.SetupAllProperties();
-            mockSetClassNameRandomizer.Setup(r => r.GetAllPossibleResults(It.IsAny<Alignment>())).Returns(() => new[] { mockSetClassNameRandomizer.Object.SetClassName });
+            mockSetClassNameRandomizer.Setup(r => r.GetAllPossibleResults(It.IsAny<Alignment>())).Returns(() => [mockSetClassNameRandomizer.Object.SetClassName]);
 
             alignments.Add(alignment);
 
@@ -233,41 +233,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
         }
 
         [Test]
-        public void RandomizersNotVerifiedIfNPCLevelAdjustmentsInvalid()
-        {
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-
-            npcs.AddRange(classNames);
-
-            levels.Clear();
-            levels.Add(20);
-
-            var verified = verifier.VerifyCompatibility(mockAlignmentRandomizer.Object, mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.False);
-        }
-
-        [Test]
-        public void RandomizersVerifiedIfOneNPCLevelAdjustmentIsAllowed()
-        {
-            baseRaces.Add("other base race");
-            metaraces.Add("other metarace");
-
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-            adjustments[baseRaces[1]] = 19;
-            adjustments[metaraces[1]] = 21;
-
-            npcs.AddRange(classNames);
-
-            levels.Clear();
-            levels.Add(20);
-
-            var verified = verifier.VerifyCompatibility(mockAlignmentRandomizer.Object, mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.True);
-        }
-
-        [Test]
         public void AlignmentNotVerifiedIfNoClassNamesForAnyAlignment()
         {
             classNames.Clear();
@@ -309,8 +274,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
             classNames.Add("third class name");
 
             mockBaseRaceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[0]))).Returns(baseRaces);
-            mockBaseRaceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[1]))).Returns(Enumerable.Empty<string>());
-            mockBaseRaceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[2]))).Returns(Enumerable.Empty<string>());
+            mockBaseRaceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[1]))).Returns([]);
+            mockBaseRaceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[2]))).Returns([]);
 
             var verified = verifier.VerifyAlignmentCompatibility(alignments[0], mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
             Assert.That(verified, Is.True);
@@ -332,8 +297,8 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
             classNames.Add("third class name");
 
             mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[0]))).Returns(metaraces);
-            mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[1]))).Returns(Enumerable.Empty<string>());
-            mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[2]))).Returns(Enumerable.Empty<string>());
+            mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[1]))).Returns([]);
+            mockMetaraceRandomizer.Setup(r => r.GetAllPossible(It.IsAny<Alignment>(), It.Is<CharacterClassPrototype>(p => p.Name == classNames[2]))).Returns([]);
 
             var verified = verifier.VerifyAlignmentCompatibility(alignments[0], mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
             Assert.That(verified, Is.True);
@@ -365,41 +330,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
 
             levels.Clear();
             levels.Add(15);
-
-            var verified = verifier.VerifyAlignmentCompatibility(alignments[0], mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.True);
-        }
-
-        [Test]
-        public void AlignmentNotVerifiedIfNPCLevelAdjustmentsInvalid()
-        {
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-
-            npcs.AddRange(classNames);
-
-            levels.Clear();
-            levels.Add(20);
-
-            var verified = verifier.VerifyAlignmentCompatibility(alignments[0], mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.False);
-        }
-
-        [Test]
-        public void AlignmentVerifiedIfOneNPCLevelAdjustmentIsAllowed()
-        {
-            baseRaces.Add("other base race");
-            metaraces.Add("other metarace");
-
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-            adjustments[baseRaces[1]] = 19;
-            adjustments[metaraces[1]] = 21;
-
-            npcs.AddRange(classNames);
-
-            levels.Clear();
-            levels.Add(20);
 
             var verified = verifier.VerifyAlignmentCompatibility(alignments[0], mockClassNameRandomizer.Object, mockLevelRandomizer.Object, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
             Assert.That(verified, Is.True);
@@ -466,37 +396,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
         }
 
         [Test]
-        public void CharacterClassNotVerifiedIfNPCLevelAdjustmentsInvalid()
-        {
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-
-            characterClass.Level = 20;
-            characterClass.IsNPC = true;
-
-            var verified = verifier.VerifyCharacterClassCompatibility(alignment, characterClass, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.False);
-        }
-
-        [Test]
-        public void CharacterClassVerifiedIfOneNPCLevelAdjustmentIsAllowed()
-        {
-            baseRaces.Add("other base race");
-            metaraces.Add("other metarace");
-
-            adjustments[baseRaces[0]] = 20;
-            adjustments[metaraces[0]] = 22;
-            adjustments[baseRaces[1]] = 19;
-            adjustments[metaraces[1]] = 21;
-
-            characterClass.Level = 20;
-            characterClass.IsNPC = true;
-
-            var verified = verifier.VerifyCharacterClassCompatibility(alignment, characterClass, mockBaseRaceRandomizer.Object, mockMetaraceRandomizer.Object);
-            Assert.That(verified, Is.True);
-        }
-
-        [Test]
         public void RaceNotVerifiedIfLevelAdjustmentsInvalid()
         {
             adjustments[race.BaseRace] = 8;
@@ -515,32 +414,6 @@ namespace DnDGen.CharacterGen.Tests.Unit.Verifiers
             adjustments[race.Metarace] = 8;
 
             characterClass.Level = 15;
-
-            var verified = verifier.VerifyRaceCompatibility(alignment, characterClass, race);
-            Assert.That(verified, Is.True);
-        }
-
-        [Test]
-        public void RaceNotVerifiedIfNPCLevelAdjustmentsInvalid()
-        {
-            adjustments[race.BaseRace] = 20;
-            adjustments[race.Metarace] = 22;
-
-            characterClass.Level = 20;
-            characterClass.IsNPC = true;
-
-            var verified = verifier.VerifyRaceCompatibility(alignment, characterClass, race);
-            Assert.That(verified, Is.False);
-        }
-
-        [Test]
-        public void RaceVerifiedIfNPCLevelAdjustmentIsAllowed()
-        {
-            adjustments[race.BaseRace] = 20;
-            adjustments[race.Metarace] = 21;
-
-            characterClass.Level = 20;
-            characterClass.IsNPC = true;
 
             var verified = verifier.VerifyRaceCompatibility(alignment, characterClass, race);
             Assert.That(verified, Is.True);

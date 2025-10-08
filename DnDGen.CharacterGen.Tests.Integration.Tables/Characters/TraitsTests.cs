@@ -46,7 +46,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Characters
         [TestCase(33, 33, "Nervous eye twitch")]
         [TestCase(34, 34, "Fiddles and fidgets nervously")]
         [TestCase(35, 35, "Whistles a lot")]
-        [TestCase(36, 36, "Signs a lot")]
+        [TestCase(36, 36, "Sighs a lot")]
         [TestCase(37, 37, "Flips a coin")]
         [TestCase(38, 38, "Good posture")]
         [TestCase(39, 39, "Stooped back")]

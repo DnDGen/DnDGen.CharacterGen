@@ -725,7 +725,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Skills
             SkillConstants.Knowledge + "/" + SkillConstants.Foci.Knowledge.Nature)]
         public void ClassSkills(string name, params string[] skills)
         {
-            base.DistinctCollection(name, skills);
+            base.AssertDistinctCollection(name, skills);
         }
     }
 }

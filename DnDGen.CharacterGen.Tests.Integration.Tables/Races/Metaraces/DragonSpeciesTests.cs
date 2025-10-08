@@ -55,9 +55,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races.Metaraces
             RaceConstants.Metaraces.Species.Black,
             RaceConstants.Metaraces.Species.Red,
             RaceConstants.Metaraces.Species.White)]
-        public override void DistinctCollection(string name, params string[] collection)
+        public override void AssertDistinctCollection(string name, params string[] collection)
         {
-            base.DistinctCollection(name, collection);
+            base.AssertDistinctCollection(name, collection);
         }
     }
 }

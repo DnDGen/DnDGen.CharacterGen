@@ -73,9 +73,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics.Spells.Known.Range
             SpellConstants.Nondetection,
             SpellConstants.SummonNaturesAllyIV,
             SpellConstants.TreeStride)]
-        public override void Collection(string name, params string[] collection)
+        public override void AssertCollection(string name, params string[] collection)
         {
-            base.Collection(name, collection);
+            base.AssertCollection(name, collection);
         }
     }
 }

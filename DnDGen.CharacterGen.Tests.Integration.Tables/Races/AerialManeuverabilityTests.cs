@@ -34,7 +34,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Races
         [TestCase(RaceConstants.Metaraces.HalfFiend, "Average Maneuverability")]
         public void AerialManeuverability(string name, string maneuverability)
         {
-            DistinctCollection(name, maneuverability);
+            AssertDistinctCollection(name, maneuverability);
         }
 
         [Test]

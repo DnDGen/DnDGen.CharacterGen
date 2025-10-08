@@ -28,9 +28,9 @@ namespace DnDGen.CharacterGen.Tests.Integration.Tables.Magics.Spells.Known.Cleri
         [TestCase("7", SpellConstants.Blasphemy)]
         [TestCase("8", SpellConstants.UnholyAura)]
         [TestCase("9", SpellConstants.SummonMonsterIX)]
-        public override void Collection(string name, params string[] collection)
+        public override void AssertCollection(string name, params string[] collection)
         {
-            base.Collection(name, collection);
+            base.AssertCollection(name, collection);
         }
     }
 }
