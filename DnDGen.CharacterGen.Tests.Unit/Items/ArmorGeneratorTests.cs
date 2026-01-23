@@ -4,7 +4,7 @@ using DnDGen.CharacterGen.Items;
 using DnDGen.CharacterGen.Items.Selectors;
 using DnDGen.CharacterGen.Races;
 using DnDGen.CharacterGen.Tables;
-using DnDGen.Infrastructure.Generators;
+using DnDGen.Infrastructure.Factories;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.RollGen;
 using DnDGen.TreasureGen.Items;

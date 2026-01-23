@@ -9,7 +9,7 @@ using DnDGen.CharacterGen.Leaders.Selectors;
 using DnDGen.CharacterGen.Races.Randomizers;
 using DnDGen.CharacterGen.Selectors;
 using DnDGen.CharacterGen.Tables;
-using DnDGen.Infrastructure.Generators;
+using DnDGen.Infrastructure.Factories;
 using DnDGen.Infrastructure.Selectors.Collections;
 using DnDGen.Infrastructure.Selectors.Percentiles;
 using Moq;
