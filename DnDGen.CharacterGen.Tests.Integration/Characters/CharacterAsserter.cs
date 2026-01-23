@@ -307,7 +307,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Characters
                 Assert.That(character.Equipment.PrimaryHand.CanBeUsedAsWeaponOrArmor, Is.True, character.Equipment.PrimaryHand.Summary);
                 Assert.That(character.Equipment.PrimaryHand.CriticalMultiplier, Is.Not.Empty, character.Equipment.PrimaryHand.Summary);
                 Assert.That(character.Equipment.PrimaryHand.DamageRoll, Is.Not.Empty, character.Equipment.PrimaryHand.Summary);
-                Assert.That(character.Equipment.PrimaryHand.DamageDescription, Is.Not.Empty, character.Equipment.PrimaryHand.Summary);
+                Assert.That(character.Equipment.PrimaryHand.DamageSummary, Is.Not.Empty, character.Equipment.PrimaryHand.Summary);
                 Assert.That(character.Equipment.PrimaryHand.Size, Is.EqualTo(character.Race.Size), character.Equipment.PrimaryHand.Summary);
                 Assert.That(character.Equipment.PrimaryHand.ThreatRange, Is.Positive, character.Equipment.PrimaryHand.Summary);
 
@@ -325,7 +325,7 @@ namespace DnDGen.CharacterGen.Tests.Integration.Characters
                         Assert.That(weapon.CanBeUsedAsWeaponOrArmor, Is.True, weapon.Summary);
                         Assert.That(weapon.CriticalMultiplier, Is.Not.Empty, weapon.Summary);
                         Assert.That(weapon.DamageRoll, Is.Not.Empty, weapon.Summary);
-                        Assert.That(weapon.DamageDescription, Is.Not.Empty, weapon.Summary);
+                        Assert.That(weapon.DamageSummary, Is.Not.Empty, weapon.Summary);
                         Assert.That(weapon.Size, Is.EqualTo(character.Race.Size), weapon.Summary);
                         Assert.That(weapon.ThreatRange, Is.Positive, weapon.Summary);
 
